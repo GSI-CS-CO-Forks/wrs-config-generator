@@ -8,6 +8,11 @@ import getpass
 import subprocess
 import os
 
+# Supported FW versions
+fw_version_supported = [
+	"5.0"
+	]
+
 # configuration items to skip
 items_skip = {
 	"5.0" : [
@@ -16,6 +21,7 @@ items_skip = {
 		"CONFIG_SNMP_SWCORESTATUS_RX_PRIO_FRAME_RATE"
 		]
 	}
+
 # configuration items to convert from string to int
 items_conv_num = {
 	"5.0" : [
@@ -149,10 +155,14 @@ print "Saving dot-config to a file: " + config_file
 print "Switch name %s" % json_data["switchName"]
 print "HW version: %s" % json_data["hardwareVersion"]
 fw_version=json_data["firmwareVersion"]
-print "FW version: %s" % fw_version
+if fw_version in fw_version_supported:
+    print "FW version: %s" % fw_version
+else:
+    print "FW version %s not supported! Exiting!" % fw_version
+    sys.exit(1)
 
 for config_item in json_data["configurationItems"]:
-    if config_item["hardwareCode"] in items_skip[fw_version]:
+    if ((fw_version in items_skip) and (config_item["hardwareCode"] in items_skip[fw_version])):
 	# skip configuration item
 	continue
     elif config_item["itemValue"] == "true":
@@ -161,7 +171,7 @@ for config_item in json_data["configurationItems"]:
 	print >>config_fd, "# %s is not set" % config_item["hardwareCode"]
     elif config_item["itemValue"] == None:
 	continue
-    elif config_item["hardwareCode"] in items_conv_num[fw_version]:
+    elif ((fw_version in items_conv_num) and (config_item["hardwareCode"] in items_conv_num[fw_version])):
 	print >>config_fd, "%s=%u" % (config_item["hardwareCode"], int(config_item["itemValue"]))
     else:
 	print >>config_fd, "%s=\"%s\"" % (config_item["hardwareCode"], config_item["itemValue"])
