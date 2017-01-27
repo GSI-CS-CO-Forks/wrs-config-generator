@@ -31,8 +31,8 @@ items_conv_num = {
 def print_help(prog_name):
     print """
     Usage:
-    """ + prog_name + """ --json <file> [--config=<file>]
-    """ + prog_name + """ <--ccde|--ccde-dev> --dev=<name> --user <user> [--password] [--ccde-out=<file>] [--config=<file>]
+    """ + prog_name + """ --json <file> [--config=<file>] [--use-defaults]
+    """ + prog_name + """ <--ccde|--ccde-dev> --dev=<name> --user <user> [--password] [--ccde-out=<file>] [--config=<file>] [--use-defaults]
 
     Options:
     --json <file>		Get the data directly from file
@@ -43,6 +43,7 @@ def print_help(prog_name):
     --password=<password>	Password to CCDE. If not provided it will be prompted.
     --config=<file>		Save generated dot-config in the file. By default in the file "dot-config".
     --dev=<name>		Specify device name
+    --use-defaults		Use defaults for configuration items not defined in json/CCDE
     """
 
 def get_data_ccde(wrs_name, url, user, password):
@@ -65,6 +66,7 @@ config_file = "dot-config"
 ccde_json_file = ''
 ccde_dev_name = ''
 file_json_in = ''
+config_use_defaults = 'no'
 
 url_ccde = 'https://ccde.cern.ch:9094/api/'
 url_ccde_dev = 'https://ccde-dev.cern.ch:9094/api/'
@@ -72,7 +74,8 @@ url_ccde_dev = 'https://ccde-dev.cern.ch:9094/api/'
 try:
     opts, args = getopt.getopt(sys.argv[1:],"h",
 			       ["help", "ccde", "ccde-dev", "json=", "config=",
-				"ccde-out=", "user=", "password=", "dev="])
+				"ccde-out=", "user=", "password=", "dev=",
+				"use-defaults"])
 except getopt.GetoptError:
     print_help(sys.argv[0])
     sys.exit(1)
@@ -96,6 +99,8 @@ for opt, arg in opts:
 	ccde_password = arg
     elif opt == "--dev":
 	ccde_dev_name = arg
+    elif opt == "--use-defaults":
+	config_use_defaults = "yes"
     else:
 	print "unknown parameter" + opt
 
@@ -194,8 +199,33 @@ process = subprocess.Popen(verify_dot_config_command.split(),
 			   cwd=kconfig_path,
 			   env=verify_dot_config_env)
 output, error = process.communicate()
-print "Errors:"
-print error
-print ""
-print "Missing configuration items:"
-print output
+
+if error:
+    print "Errors:"
+    print error
+    print ""
+if output:
+    print "Missing configuration items:"
+    print output
+    print ""
+
+if (config_use_defaults != "yes" and (error or output)):
+    print "Dot-config contains errors! Exiting!"
+    sys.exit(1)
+
+if (config_use_defaults == "yes"):
+    verify_dot_config_command = "../../bin/conf -s --olddefconfig Kconfig"
+    process = subprocess.Popen(verify_dot_config_command.split(),
+			       stdout=subprocess.PIPE,
+			       stderr=subprocess.PIPE,
+			       cwd=kconfig_path,
+			       env=verify_dot_config_env)
+    output, error = process.communicate()
+    if error:
+	print "Errors:"
+	print error
+	print ""
+    if output:
+	print "Missing configuration items:"
+	print output
+	print ""
