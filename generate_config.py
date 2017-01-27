@@ -5,6 +5,8 @@ import requests
 import base64
 import sys, getopt
 import getpass
+import subprocess
+import os
 
 def print_help(prog_name):
     print """
@@ -120,7 +122,8 @@ config_fd=open(config_file, 'w')
 print "Saving dot-config to a file: " + config_file
 print "Switch name %s" % json_data["switchName"]
 print "HW version: %s" % json_data["hardwareVersion"]
-print "FW version: %s" % json_data["firmwareVersion"]
+fw_version=json_data["firmwareVersion"]
+print "FW version: %s" % fw_version
 
 for config_item in json_data["configurationItems"]:
     if config_item["itemValue"] == "true":
@@ -147,3 +150,26 @@ for port_item in json_data["ports"]:
 	port_item["ptpRole"],
 	port_item["fiber"]
 	)
+config_fd.close()
+
+# the directory of the script being run
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# set the path to Kconfig from particular FW release
+kconfig_path = script_dir + "/kconfigs/v" + fw_version
+# KCONFIG_CONFIG points to the dot-config file
+verify_dot_config_env = os.environ.copy()
+verify_dot_config_env["KCONFIG_CONFIG"] = "../../" + config_file
+verify_dot_config_command = "../../bin/conf --listnewconfig Kconfig"
+
+process = subprocess.Popen(verify_dot_config_command.split(),
+			   stdout=subprocess.PIPE,
+			   stderr=subprocess.PIPE,
+			   cwd=kconfig_path,
+			   env=verify_dot_config_env)
+output, error = process.communicate()
+print "Errors:"
+print error
+print ""
+print "Missing configuration items:"
+print output
