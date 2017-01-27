@@ -8,6 +8,26 @@ import getpass
 import subprocess
 import os
 
+# configuration items to skip
+items_skip = {
+	"5.0" : [
+		"CONFIG_SNMP_SWCORESTATUS_HP_FRAME_RATE",
+		"CONFIG_SNMP_SWCORESTATUS_RX_FRAME_RATE",
+		"CONFIG_SNMP_SWCORESTATUS_RX_PRIO_FRAME_RATE"
+		]
+	}
+# configuration items to convert from string to int
+items_conv_num = {
+	"5.0" : [
+		"CONFIG_SNMP_TEMP_THOLD_FPGA",
+		"CONFIG_SNMP_TEMP_THOLD_PLL",
+		"CONFIG_SNMP_TEMP_THOLD_PSL",
+		"CONFIG_SNMP_TEMP_THOLD_PSR"
+		]
+	}
+
+# -----------------------------------------------------------------------------
+
 def print_help(prog_name):
     print """
     Usage:
@@ -31,6 +51,7 @@ def get_data_ccde(wrs_name, url, user, password):
     s.post(url + 'login', data={'authentication':authData}, verify=False)
     r = s.get(url + 'switches/' + wrs_name + '/configuration', verify=False)
     return r.text
+
 
 
 # -----------------------------------------------------------------------------
@@ -126,12 +147,17 @@ fw_version=json_data["firmwareVersion"]
 print "FW version: %s" % fw_version
 
 for config_item in json_data["configurationItems"]:
-    if config_item["itemValue"] == "true":
+    if config_item["hardwareCode"] in items_skip[fw_version]:
+	# skip configuration item
+	continue
+    elif config_item["itemValue"] == "true":
 	print >>config_fd, "%s=y" % config_item["hardwareCode"]
     elif config_item["itemValue"] == "false":
 	print >>config_fd, "# %s is not set" % config_item["hardwareCode"]
     elif config_item["itemValue"] == None:
 	continue
+    elif config_item["hardwareCode"] in items_conv_num[fw_version]:
+	print >>config_fd, "%s=%u" % (config_item["hardwareCode"], int(config_item["itemValue"]))
     else:
 	print >>config_fd, "%s=\"%s\"" % (config_item["hardwareCode"], config_item["itemValue"])
 
