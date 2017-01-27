@@ -1,0 +1,149 @@
+#!/usr/bin/env python2.7
+
+import json
+import requests
+import base64
+import sys, getopt
+import getpass
+
+def print_help(prog_name):
+    print """
+    Usage:
+    """ + prog_name + """ --json <file> [--config=<file>]
+    """ + prog_name + """ <--ccde|--ccde-dev> --dev=<name> --user <user> [--password] [--ccde-out=<file>] [--config=<file>]
+
+    Options:
+    --json <file>		Get the data directly from file
+    --ccde			Get the data from the CCDE
+    --ccde-dev			Get the data from the dev version of CCDE
+    --ccde-out=<file>		Save data from CCDE to the file. Requires ccde or ccde-dev to be used
+    --user=<user>		User to CCDE. If not specified system username will be used.
+    --password=<password>	Password to CCDE. If not provided it will be prompted.
+    --config=<file>		Save generated dot-config in the file. By default in the file "dot-config".
+    --dev=<name>		Specify device name
+    """
+
+def get_data_ccde(wrs_name, url, user, password):
+    authData = base64.encodestring('%s:%s' % (user, password)).replace('\n', '')
+    s = requests.Session()
+    s.post(url + 'login', data={'authentication':authData}, verify=False)
+    r = s.get(url + 'switches/' + wrs_name + '/configuration', verify=False)
+    return r.text
+
+
+# -----------------------------------------------------------------------------
+
+inputfile = ''
+outputfile = ''
+ccde_url = ''
+ccde_user = ''
+ccde_password = ''
+config_file = "dot-config"
+ccde_json_file = ''
+ccde_dev_name = ''
+file_json_in = ''
+
+url_ccde = 'https://ccde.cern.ch:9094/api/'
+url_ccde_dev = 'https://ccde-dev.cern.ch:9094/api/'
+
+try:
+    opts, args = getopt.getopt(sys.argv[1:],"h",
+			       ["help", "ccde", "ccde-dev", "json=", "config=",
+				"ccde-out=", "user=", "password=", "dev="])
+except getopt.GetoptError:
+    print_help(sys.argv[0])
+    sys.exit(1)
+for opt, arg in opts:
+    if opt in ("-h", "--help"):
+	print_help(sys.argv[0])
+	sys.exit()
+    elif opt == "--ccde":
+	ccde_url = 'https://ccde.cern.ch:9094/api/'
+    elif opt == "--ccde-dev":
+	ccde_url = 'https://ccde-dev.cern.ch:9094/api/'
+    elif opt == "--json":
+	file_json_in = arg
+    elif opt == "--config":
+	config_file = arg
+    elif opt == "--ccde-out":
+	ccde_json_file = arg
+    elif opt == "--user":
+	ccde_user = arg
+    elif opt == "--password":
+	ccde_password = arg
+    elif opt == "--dev":
+	ccde_dev_name = arg
+    else:
+	print "unknown parameter" + opt
+
+if (ccde_url != '') and (file_json_in != ''):
+    print "Please specify only one --ccde[-dev] or --json"
+
+# Get data from CCDE
+if (ccde_url != ''):
+    if (ccde_user == ''):
+	ccde_user = getpass.getuser()
+	print "Using current user's username for CCDE: " + ccde_user
+    if (ccde_password == ''):
+	ccde_password = getpass.getpass("Password for user " + ccde_user + " to access CCDE:")
+    if (ccde_dev_name == ''):
+	print "Please specify device name for CCDE access"
+	sys.exit(1)
+    ccde_data = get_data_ccde(ccde_dev_name, ccde_url, ccde_user, ccde_password)
+    if (ccde_json_file != ''):
+	print "Save ccde data to file: " + ccde_json_file
+	ccdb_json_file_out = open(ccde_json_file, 'w')
+	ccdb_json_file_out.write(ccde_data)
+	ccdb_json_file_out.close()
+    try:
+	json_data = json.loads(ccde_data)
+    except ValueError:
+	print "ERROR: Unable to get valid json data from CCDE."
+	if (ccde_json_file != ''):
+	    print "Please check the file for CCDE response " + ccde_json_file
+	else:
+	    print "Please use parameter --ccde-out check the file for CCDE response " + ccde_json_file
+	sys.exit(1)
+
+# Get data from local file
+if (file_json_in != ''):
+    print "Reading data from file: " + file_json_in
+    with open(file_json_in) as data_file:
+	try:
+	    json_data = json.load(data_file)
+	except ValueError:
+	    print "Error: Syntax error in file: " + file_json_in
+	    sys.exit(1)
+    data_file.close()
+
+config_fd=open(config_file, 'w')
+print "Saving dot-config to a file: " + config_file
+print "Switch name %s" % json_data["switchName"]
+print "HW version: %s" % json_data["hardwareVersion"]
+print "FW version: %s" % json_data["firmwareVersion"]
+
+for config_item in json_data["configurationItems"]:
+    if config_item["itemValue"] == "true":
+	print >>config_fd, "%s=y" % config_item["hardwareCode"]
+    elif config_item["itemValue"] == "false":
+	print >>config_fd, "# %s is not set" % config_item["hardwareCode"]
+    elif config_item["itemValue"] == None:
+	continue
+    else:
+	print >>config_fd, "%s=\"%s\"" % (config_item["hardwareCode"], config_item["itemValue"])
+
+# Add CONFIG_PORTXX_PARAMS
+for port_item in json_data["ports"]:
+    # check the range of ports
+    if not (1 <= int(port_item["portNumber"]) <= 18):
+	print "Error: Port " + port_item["portNumber"] + " out of range!"
+	continue
+    print >>config_fd, "CONFIG_PORT%02u_PARAMS=\"name=wri%u,proto=%s,tx=%u,rx=%u,role=%s,fiber=%s\""	% (
+	int(port_item["portNumber"]),
+	int(port_item["portNumber"]),
+	port_item["proto"],
+	int(port_item["dtx"]),
+	int(port_item["drx"]),
+	port_item["ptpRole"],
+	port_item["fiber"]
+	)
