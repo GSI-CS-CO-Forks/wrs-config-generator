@@ -163,16 +163,19 @@ if (file_json_in != ''):
 	    sys.exit(1)
     data_file.close()
 
-config_fd=open(config_file, 'w')
+config_fd = open(config_file, 'w')
 print "Saving dot-config to a file: " + config_file
 print "Switch name %s" % json_data["switchName"]
 print "HW version: %s" % json_data["hardwareVersion"]
+print >>config_fd, "CONFIG_DOTCONF_HW_VERSION=\"%s\"" % json_data["hardwareVersion"]
+
 fw_version=json_data["firmwareVersion"]
 if fw_version in fw_version_supported:
     print "FW version: %s" % fw_version
 else:
     print "FW version %s not supported! Exiting!" % fw_version
     sys.exit(1)
+print >>config_fd, "CONFIG_DOTCONF_FW_VERSION=\"%s\"" % json_data["firmwareVersion"]
 
 for config_item in json_data["configurationItems"]:
     if ((fw_version in items_skip) and (config_item["hardwareCode"] in items_skip[fw_version])):
@@ -204,6 +207,8 @@ for port_item in json_data["ports"]:
 	port_item["ptpRole"],
 	port_item["fiber"]
 	)
+
+# close dot-config file
 config_fd.close()
 
 # the directory of the script being run
