@@ -10,12 +10,18 @@ import os
 
 # Supported FW versions
 fw_version_supported = [
-	"5.0"
+	"5.0",
+	"5.0-dev"
 	]
 
 # configuration items to skip
 items_skip = {
 	"5.0" : [
+		"CONFIG_SNMP_SWCORESTATUS_HP_FRAME_RATE",
+		"CONFIG_SNMP_SWCORESTATUS_RX_FRAME_RATE",
+		"CONFIG_SNMP_SWCORESTATUS_RX_PRIO_FRAME_RATE"
+		],
+	"5.0-dev" : [
 		"CONFIG_SNMP_SWCORESTATUS_HP_FRAME_RATE",
 		"CONFIG_SNMP_SWCORESTATUS_RX_FRAME_RATE",
 		"CONFIG_SNMP_SWCORESTATUS_RX_PRIO_FRAME_RATE"
@@ -29,7 +35,14 @@ items_conv_num = {
 		"CONFIG_SNMP_TEMP_THOLD_PLL",
 		"CONFIG_SNMP_TEMP_THOLD_PSL",
 		"CONFIG_SNMP_TEMP_THOLD_PSR"
+		],
+	"5.0-dev" : [
+		"CONFIG_SNMP_TEMP_THOLD_FPGA",
+		"CONFIG_SNMP_TEMP_THOLD_PLL",
+		"CONFIG_SNMP_TEMP_THOLD_PSL",
+		"CONFIG_SNMP_TEMP_THOLD_PSR"
 		]
+
 	}
 
 # -----------------------------------------------------------------------------

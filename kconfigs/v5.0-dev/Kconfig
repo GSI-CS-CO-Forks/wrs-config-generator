@@ -1,0 +1,994 @@
+
+mainmenu "White Rabbit Switch  configuration"
+
+config DOTCONF_FW_VERSION
+	string "Firmware version"
+	default "5.0"
+	help
+	  Free-text information about switch's firmware version. This field is
+	  for information purpose only. Additionally this field describes
+	  version of Kconfig.
+
+config DOTCONF_HW_VERSION
+	string "Hardware version"
+	help
+	  Free-text information about switch's Hardware version. This field is
+	  for information purpose only.
+
+config DOTCONF_INFO
+	string "Additional info about dot-config"
+	help
+	  Free-text information about switch's dot-config. This field is
+	  for information purpose only.
+
+choice DOTCONF_SOURCE
+	  prompt "Source for a run-time replacement of dot-config"
+	  default DOTCONF_SOURCE_TRY_DHCP
+
+config DOTCONF_SOURCE_LOCAL
+	bool "Use local dot-config"
+	help
+	  The White Rabbit Switch is configured at run-time,
+	  according to a dot-config .config file. The file
+	  is the same .config you are defining now. If you
+	  select this option, dot-config is not replaced
+	  at run time.
+
+config DOTCONF_SOURCE_REMOTE
+	bool "Use remote dot-config"
+	help
+	  Use the URL to dot-config provided in DOTCONF_URL.
+
+config DOTCONF_SOURCE_FORCE_DHCP
+	bool "Force to get the URL to a dot-config via DHCP"
+	help
+	  Retrieve a URL to the dot-config via DHCP at boot.
+	  The URL can be configured in the "filename" configuration field of
+	  the DHCP server.
+
+config DOTCONF_SOURCE_TRY_DHCP
+	bool "Try to get the URL to a dot-config via DHCP"
+	help
+	  The same as DOTCONF_SOURCE_FORCE_DHCP, but this option does not
+	  cause errors in SNMP's objects if the switch fails to retrieve
+	  the URL to the dot-config via DHCP.
+
+endchoice
+
+config DOTCONF_URL
+	string "URL for a run-time replacement of dot-config"
+	depends on DOTCONF_SOURCE_REMOTE
+	help
+	  tftp://, ftp:// or http:// URLs are allowed. Names are allowed if
+	  you configured a DNS server. The special strings HOSTNAME, IPADDR and
+	  MACADDR are substituted before retrieving the file.
+	  Example:  "tftp://morgana/wrs-config-IPADDR"
+
+config BR2_CONFIGFILE
+	string "Configuration file for Buildroot"
+	default "wrs_release_br2_config"
+	help
+	  The configuration file selects which packages are to be
+	  included in the WRS filesystem and which are not.  If
+	  you pass a relative pathname, the build procedure will
+	  look for it in wr-switch-sw/configs/buildroot, while
+	  absolute pathnames are used unchanged.
+
+	  If the string being passed doesn't refer to a file, the
+	  scripts print a warning and use the default file. Incorrect
+	  files lead to unpredicatable results.
+
+config PPSI
+	bool
+	default y
+
+menu "Local Network Configuration"
+
+choice
+	prompt "Management port configuration (eth0)"
+	default ETH0_DHCP
+
+config ETH0_DHCP
+	bool "DHCP forever"
+	help
+	  Try DHCP on management port (eth0) forever.
+
+config ETH0_DHCP_ONCE
+	bool "Try DHCP, if fail use static address"
+	help
+	  Try DHCP on management port (eth0) for a while, then configure
+	  static IP. Useful, when you move switch between various development
+	  enviroments.
+
+config ETH0_STATIC
+	bool "Static address"
+	help
+	  Use static address on management port (eth0). Don't try to DHCP.
+
+endchoice
+
+menu "Management port (eth0) Address"
+depends on ETH0_DHCP_ONCE || ETH0_STATIC
+
+config ETH0_IP
+	string "Static IP address of management port (eth0)"
+	default "192.168.1.254"
+	help
+	  Static IP address of management port (eth0). Please note that
+	  wrong IP address will generate a runtime error on the switch.
+
+config ETH0_MASK
+	string "Mask of management port (eth0)"
+	default "255.255.255.0"
+	help
+	  Mask of management port (eth0). Please note that wrong mask will
+	  generate a runtime error on the switch.
+
+config ETH0_NETWORK
+	string "Network of management port (eth0)"
+	default "192.168.1.0"
+	help
+	  Network of management port (eth0). Please note that wrong network
+	  will generate a runtime error on the switch.
+
+config ETH0_BROADCAST
+	string "Broadcast of management port (eth0)"
+	default "192.168.1.255"
+	help
+	  Broadcast of management port (eth0). Please note that wrong broadcast
+	  will generate a runtime error on the switch.
+
+config ETH0_GATEWAY
+	string "Default gateway of management port (eth0)"
+	default "192.168.1.1"
+	help
+	  Default gateway of management port (eth0). Please note that
+	  wrong gateway address will generate a runtime error on the switch.
+
+endmenu
+
+choice
+	prompt "Hostname source"
+	default HOSTNAME_DHCP
+
+config HOSTNAME_DHCP
+	bool "Get hostname via DHCP"
+	help
+	  Get hostname from DHCP server.
+
+config HOSTNAME_STATIC
+	bool "Use static hostname"
+	help
+	  Use static Hostname stored in CONFIG_HOSTNAME_STRING
+
+endchoice
+
+config HOSTNAME_STRING
+	string "Static hostname of the switch"
+	default "wrs"
+	depends on HOSTNAME_STATIC
+	help
+	  Use this string as a static hostname of the switch.
+
+menu "Root Password"
+
+config ROOT_PWD_IS_ENCRYPTED
+	bool "Should this file include an encripted root password?"
+	help
+	  The root password, as set here, can be in clear text or
+	  encrypted. If it is specified as clear text, it is encrypted and
+	  stored in the switch at run time.  If it specified in pre-encrypted
+	  form, the string will just be copied in place. A clear-text
+	  password in dot-config is less safe against sniffers.
+
+config ROOT_PWD_CLEAR
+	string "The password to be used at run time"
+	depends on !ROOT_PWD_IS_ENCRYPTED
+	default ""
+	help
+	  The string to be encrypted at boot time by the switch itself,
+	  to later use normal ssh authentication. The empty string is
+	  allowed.
+
+config ROOT_PWD_CYPHER
+	string "The password to be used at run time"
+	depends on ROOT_PWD_IS_ENCRYPTED
+	help
+	  The actual pre-encrypted string. This is stored at run time
+	  into /etc/passwd, for ssh authenticazion. To create the
+	  string, please run "mkpasswd --method=md5 <password>"
+
+endmenu
+
+
+config NTP_SERVER
+	string "IP address of local NTP server (empty for none)"
+	help
+	  At boot time, the White Rabbit time is primed by querying
+	  an NTP server, if any is there.  Please write here the
+	  IPV4 address (e.g.: "192.168.16.1"); an empty string
+	  disables NTP-based priming.
+
+config DNS_SERVER
+	string "static IP address of local DNS server (empty for none)"
+	help
+	  Using names instead of IP addresses is sometimes handy. This
+	  option allow to specify a static server name, that is stored
+	  in /etc/resolv.conf, within the WRS image being built. If
+	  the string is empty, /etc/resolv.conf is managed according
+	  to buildroot defaults.
+
+config DNS_DOMAIN
+	string "Default domain for DNS resolution"
+	help
+	  If CONFIG_DNS_SERVER is being used, this option may be
+	  useful as well.
+
+config REMOTE_SYSLOG_SERVER
+	string "Send WRS syslog messages to this remote host"
+	help
+	  This IP address or name, if not empty enables remote syslog
+	  in the switch; all messages are sent to this specific host.
+
+config REMOTE_SYSLOG_UDP
+	bool "Use UDP for syslog messages"
+	default y
+	help
+	  Select UDP to send system logs. If not set, TCP is used.
+
+config WRS_LOG_HAL
+	string "Logging directions for the WR hal"
+	default "daemon.info"
+	help
+	  The string can be a pathname (e.g. /dev/kmsg) or a <facility>.<level>
+	  spefification like "daemon.debug". An empty strings is used
+	  to represent no logging (like /dev/null).  Please note that
+	  unknown facility names will generate a runtime error on the switch.
+	  Please note that all messages produced by the WR HAL if syslog is
+	  configured will be passed to the syslog at the same
+	  <facility>.<level>, no matter of verbosity of a message.
+
+config WRS_LOG_LEVEL_HAL
+	string "Logging verbosity level for the WR HAL"
+	default ""
+	help
+	  Specify verbosity of WR HAL as a string or number. The following
+	  levels are supported:
+	  ALERT (1)
+	  ERROR (3)
+	  WARNING (4)
+	  INFO (6)
+	  DEBUG (7)
+	  By leaving this item empty, HAL will use its default verbosity level
+	  (INFO).
+	  Please note that all messages produced by the WR HAL if syslog is
+	  configured will be passed to the syslog at the same
+	  <facility>.<level>, no matter of verbosity of a message.
+
+config WRS_LOG_RTU
+	string "Logging directions for the RTU daemon"
+	default "daemon.info"
+	help
+	  The string can be a pathname (e.g. /dev/kmsg) or a <facility>.<level>
+	  spefification like "daemon.debug". An empty strings is used
+	  to represent no logging (like /dev/null).  Please note that
+	  unknown facility names will generate a runtime error on the switch.
+	  Please note that all messages produced by RTU daemon if syslog is
+	  configured will be passed to the syslog at the same
+	  <facility>.<level>, no matter of verbosity of a message.
+
+config WRS_LOG_LEVEL_RTU
+	string "Logging verbosity level for the RTU daemon"
+	default ""
+	help
+	  Specify verbosity of RTU daemon as a string or number. The following
+	  levels are supported:
+	  ALERT (1)
+	  ERROR (3)
+	  WARNING (4)
+	  INFO (6)
+	  DEBUG (7)
+	  By leaving this item empty, RTU daemon will use its default verbosity
+	  level (INFO).
+	  Please note that all messages produced by RTU daemon if syslog is
+	  configured will be passed to the syslog at the same
+	  <facility>.<level>, no matter of verbosity of a message.
+
+config WRS_LOG_PTP
+	string "Logging directions for the PTP server (ppsi)"
+	default "daemon.info"
+	help
+	  The string can be a pathname (e.g. /dev/kmsg) or a <facility>.<level>
+	  spefification like "daemon.debug". An empty strings is used
+	  to represent no logging (like /dev/null).  Please note that
+	  unknown facility names will generate a runtime error on the switch.
+	  Please note that all messages produced by PPSi if syslog is
+	  configured will be passed to the syslog at the same
+	  <facility>.<level>, no matter of verbosity of a message.
+
+config WRS_LOG_LEVEL_PTP
+	string "Logging verbosity level for the PTP server (ppsi)"
+	default ""
+	help
+	  Specify verbosity of PPSi daemon as a string. This string will be
+	  passed to the PPSI after "-d" parameter. Please refer to the PPSI's
+	  documentation for more details.
+	  By leaving this item empty, PPSi daemon will use its default
+	  verbosity level.
+	  Please note that all messages produced by PPSi if syslog is
+	  configured will be passed to the syslog at the same
+	  <facility>.<level>, no matter of verbosity of a message.
+
+config WRS_LOG_SNMPD
+	string "Logging directions for the SNMP daemon"
+	default "Swd"
+	help
+	  The string can be a pathname (e.g. /dev/kmsg) or a valid snmpd log
+	  option (without -L). "Swd" will forward messages with priority at
+	  least warning to syslog with daemon as facility. To set level (i.e. 5)
+	  use "S 5 daemon". For details please check "man snmpcmd". An empty
+	  strings is used  to represent no logging (like /dev/null). Please
+	  note that unknown facility names will generate a runtime error on the
+	  switch. NOTE: It looks like Notice is not a default logging priority
+	  as writen in manual.
+
+config WRS_LOG_MONIT
+	string "Logging directions for the monit"
+	default "syslog"
+	help
+	  The string can be a pathname (e.g. /dev/kmsg) or a "syslog" string.
+	  An empty strings is used  to represent no logging. If it is needed to
+	  select facility and level please leave here empty string and change
+	  /etc/monitrc file directly.
+	  Please note that unknown facility names will generate a runtime error
+	  on the switch.
+
+config WRS_LOG_OTHER
+	string "Logging directions for other programs"
+	default "daemon.info"
+	help
+	  Redirect output from other programs.
+	  In the current version following programs uses this option:
+	  --wrs_watchdog
+	  --wrs_auxclk
+	  --wrs_custom_boot_script.sh
+	  --vlan.sh
+	  This collective entry is to avoid number of entries in dot-config.
+	  The string can be a pathname (e.g. /dev/kmsg) or a <facility>.<level>
+	  spefification like "daemon.debug". An empty strings is used
+	  to represent no logging (like /dev/null).  Please note that
+	  unknown facility names will generate a runtime error on the switch.
+
+config WRS_LOG_LEVEL_OTHER
+	string "Logging verbosity level for other programs"
+	default ""
+	help
+	  Specify verbosity of other programs as a string or number. The
+	  following levels are supported:
+	  ALERT (1)
+	  ERROR (3)
+	  WARNING (4)
+	  INFO (6)
+	  DEBUG (7)
+	  By leaving this item empty, other programs daemon will use their
+	  default verbosity level (INFO).
+	  Please note that all messages produced by other programs if syslog is
+	  configured will be passed to the syslog at the same
+	  <facility>.<level>
+
+config KEEP_ROOTFS
+	bool "Keep generated filesystem and related script"
+	help
+	  During development of build scripts, it may be useful
+	  to keep the generated root filesystem as well as the
+	  script used to create it. If selected, the build script
+	  will report the actual file names at each build.
+	  If unsusre, say N.
+
+endmenu
+
+menu "Port Timing Configuration"
+
+config PORT01_PARAMS
+	string "Parameters for port 1"
+	default "name=wri1,proto=raw,tx=223897,rx=226273,role=slave,fiber=0" if TIME_BC
+	default "name=wri1,proto=raw,tx=223897,rx=226273,role=master,fiber=0"
+	help
+	  This item, and the following ones, are used to assign the tx and rx
+	  constant delays (likely from calibration), protocol type (raw or udp),
+	  port roles, type of fiber (number referring to the corresponding
+	  FIBERXX_PARAMS) and vlan configuration of PPSi for each of the ports.
+	  Please refer to the user manual for more information.
+	  "role" can be one of the following:
+	    - master - configure port as a master
+	    - slave - configure port as a slave
+	    - auto - when a port is connected to master behave as a slave,
+		     otherwise behave as master
+	    - non-wr - don't report problems with this port via SNMP like SFP
+		       not in DB, copper SFP connected, non 1GB SFP etc.
+	    - none - disable White Rabbit and PTP on a port
+
+config PORT02_PARAMS
+	string "Parameters for port 2"
+	default "name=wri2,proto=raw,tx=224037,rx=226377,role=master,fiber=0"
+	help
+	  Please check the help of PORT01_PARAMS
+
+config PORT03_PARAMS
+	string "Parameters for port 3"
+	default "name=wri3,proto=raw,tx=224142,rx=226638,role=master,fiber=0"
+	help
+	  Please check the help of PORT01_PARAMS
+
+config PORT04_PARAMS
+	string "Parameters for port 4"
+	default "name=wri4,proto=raw,tx=224313,rx=226471,role=master,fiber=0"
+	help
+	  Please check the help of PORT01_PARAMS
+
+config PORT05_PARAMS
+	string "Parameters for port 5"
+	default "name=wri5,proto=raw,tx=224455,rx=227679,role=master,fiber=0"
+	help
+	  Please check the help of PORT01_PARAMS
+
+config PORT06_PARAMS
+	string "Parameters for port 6"
+	default "name=wri6,proto=raw,tx=224603,rx=227891,role=master,fiber=0"
+	help
+	  Please check the help of PORT01_PARAMS
+
+config PORT07_PARAMS
+	string "Parameters for port 7"
+	default "name=wri7,proto=raw,tx=224761,rx=228055,role=master,fiber=0"
+	help
+	  Please check the help of PORT01_PARAMS
+
+config PORT08_PARAMS
+	string "Parameters for port 8"
+	default "name=wri8,proto=raw,tx=224898,rx=228178,role=master,fiber=0"
+	help
+	  Please check the help of PORT01_PARAMS
+
+config PORT09_PARAMS
+	string "Parameters for port 9"
+	default "name=wri9,proto=raw,tx=225069,rx=228277,role=master,fiber=0"
+	help
+	  Please check the help of PORT01_PARAMS
+
+config PORT10_PARAMS
+	string "Parameters for port 10"
+	default "name=wri10,proto=raw,tx=225245,rx=228435,role=master,fiber=0"
+	help
+	  Please check the help of PORT01_PARAMS
+
+config PORT11_PARAMS
+	string "Parameters for port 11"
+	default "name=wri11,proto=raw,tx=225463,rx=228963,role=master,fiber=0"
+	help
+	  Please check the help of PORT01_PARAMS
+
+config PORT12_PARAMS
+	string "Parameters for port 12"
+	default "name=wri12,proto=raw,tx=225645,rx=229107,role=master,fiber=0"
+	help
+	  Please check the help of PORT01_PARAMS
+
+config PORT13_PARAMS
+	string "Parameters for port 13"
+	default "name=wri13,proto=raw,tx=225801,rx=229225,role=master,fiber=0"
+	help
+	  Please check the help of PORT01_PARAMS
+
+config PORT14_PARAMS
+	string "Parameters for port 14"
+	default "name=wri14,proto=raw,tx=225983,rx=229463,role=master,fiber=0"
+	help
+	  Please check the help of PORT01_PARAMS
+
+config PORT15_PARAMS
+	string "Parameters for port 15"
+	default "name=wri15,proto=raw,tx=226208,rx=229850,role=master,fiber=0"
+	help
+	  Please check the help of PORT01_PARAMS
+
+config PORT16_PARAMS
+	string "Parameters for port 16"
+	default "name=wri16,proto=raw,tx=226393,rx=229907,role=master,fiber=0"
+	help
+	  Please check the help of PORT01_PARAMS
+
+config PORT17_PARAMS
+	string "Parameters for port 17"
+	default "name=wri17,proto=raw,tx=226594,rx=230106,role=master,fiber=0"
+	help
+	  Please check the help of PORT01_PARAMS
+
+config PORT18_PARAMS
+	string "Parameters for port 18"
+	default "name=wri18,proto=raw,tx=226737,rx=230273,role=master,fiber=0"
+	help
+	  Please check the help of PORT01_PARAMS
+
+endmenu
+
+menu "SFP and Media Timing Configuration"
+
+config SFP00_PARAMS
+	string "Parameters for one SFP device type"
+	default "vn=Axcen Photonics,pn=AXGE-1254-0531,tx=0,rx=0,wl_txrx=1310+1490"
+	help
+	  This parameter, and the following ones, are used to
+	  configure the timing parameters of a specific SFP
+	  transceiver. The transceiver name is autodected for each port
+	  in the White Rabbit Switch, and you need one configuration
+	  entry for each transceiver type that is installed in your
+	  device.
+	  vn (optional) - Vendor Name of an SFP
+	  pn - Part Number of an SFP
+	  vs (optional) - Vendor Serial (serial number) of an SFP
+	  tx - TX delay of an SFP
+	  rx - RX delay of an SFP
+	  wl_txrx - Tx wavelength separated by "+" with Rx wavelength of an SFP;
+		    for example wl_txrx=1490+1310
+
+config SFP01_PARAMS
+	string "Parameters for one SFP device type"
+	default "vn=Axcen Photonics,pn=AXGE-3454-0531,tx=0,rx=0,wl_txrx=1490+1310"
+	help
+	  Please check the help of SFP00_PARAMS
+
+config SFP02_PARAMS
+	string "Parameters for one SFP device type"
+	default "vn=APAC Opto,pn=LS38-C3S-TC-N-B9,tx=761,rx=557,wl_txrx=1310+1490"
+	help
+	  Please check the help of SFP00_PARAMS
+
+config SFP03_PARAMS
+	string "Parameters for one SFP device type"
+	default "vn=APAC Opto,pn=LS48-C3S-TC-N-B4,tx=-29,rx=507,wl_txrx=1490+1310"
+	help
+	  Please check the help of SFP00_PARAMS
+
+config SFP04_PARAMS
+	string "Parameters for one SFP device type"
+	default "vn=ZyXEL,pn=SFP-BX1490-10-D,tx=0,rx=0,wl_txrx=1490+1310"
+	help
+	  Please check the help of SFP00_PARAMS
+
+config SFP05_PARAMS
+	string "Parameters for one SFP device type"
+	default "vn=ZyXEL,pn=SFP-BX1310-10-D,tx=0,rx=0,wl_txrx=1310+1490"
+	help
+	  Please check the help of SFP00_PARAMS
+
+config SFP06_PARAMS
+	string "Parameters for one SFP device type"
+	help
+	  Please check the help of SFP00_PARAMS
+
+config SFP07_PARAMS
+	string "Parameters for one SFP device type"
+	help
+	  Please check the help of SFP00_PARAMS
+
+config SFP08_PARAMS
+	string "Parameters for one SFP device type"
+	help
+	  Please check the help of SFP00_PARAMS
+
+config SFP09_PARAMS
+	string "Parameters for one SFP device type"
+	help
+	  Please check the help of SFP00_PARAMS
+
+
+config FIBER00_PARAMS
+	string "Alpha parameters for fiber type 0"
+	default "alpha_1310_1490=2.6787e-04"
+	help
+	  This parameter specify the physical features of used fiber type.
+	  Specify the alpha value for each pair of used wavelengths.
+	  This parameter follows a format:
+	  alpha_XXXX_YYYY=1.23e-04,alpha_AAAA_BBBB=4.56e-04,...
+	  where XXX_YYYY and AAAA_BBBB are pairs of used wavelengths,
+	  1.23e-04, 4.56e-04 are alpha values to be used for particular
+	  wavelengths
+	  The index ("00" onwards) is used to match the port
+	  (CONFIG_PORTxx_PARAMS) with one of several installed fiber types.
+
+config FIBER01_PARAMS
+	string "Alpha parameters for fiber type 1"
+	default "alpha_1310_1490=2.6787e-04"
+	help
+	  Please check the help of FIBER00_PARAMS
+
+config FIBER02_PARAMS
+	string "Alpha parameters for fiber type 2"
+	default "alpha_1310_1490=2.6787e-04"
+	help
+	  Please check the help of FIBER00_PARAMS
+
+config FIBER03_PARAMS
+	string "Alpha parameters for fiber type 3"
+	default "alpha_1310_1490=2.6787e-04"
+	help
+	  Please check the help of FIBER00_PARAMS
+
+endmenu
+
+choice
+	prompt "Timing Mode"
+	default TIME_BC
+
+config TIME_GM
+	bool "Grand-Master"
+	help
+	  This options selects the White Rabbit Switch as a grandmaster,
+	  i.e. it uses its input channels to track an Atomic or GPS and
+	  claim to be a PTP authoritative source on the network.
+
+config TIME_FM
+	bool "Free-Running Master"
+	help
+	  The White Rabbit Switch pretends to be a master on his PTP
+	  network, but it doesn't sync to an external source. Its own
+	  internal clocks and counters are used to drive timing.
+
+config TIME_BC
+	bool "Boundary Clock"
+	help
+	  The White Rabbit Switch is a normal PTP Boundary Clock: it is
+	  slave on one of its ports and master on the other ones, according
+	  to the standard Best Master Clock algorithm.
+
+endchoice
+
+choice
+	prompt "PTP Port Assignment"
+	default PTP_PORT_PARAMS
+	help
+	  You can choose wether to use parameters defined in PORTXX_PARAMS or
+	  your own custom configuration file placed in switch filesystem
+	  or downloaded at boot time.
+
+config PTP_PORT_PARAMS
+	bool "Generate ppsi.conf based on the PORTXX_PARAMS"
+	help
+	  Generate ppsi.conf based on "proto" and "role" specified for each
+	  port in PORTXX_PARAMS.
+	  PPSI's global settings can be set in file
+	  /wr/etc/ppsi-pre.conf
+
+config PTP_CUSTOM
+	bool "Custom ppsi.conf in the WRS filesystem"
+	help
+	  Use custom file for ppsi defined by CONFIG_PTP_CUSTOM_FILENAME.
+
+config PTP_REMOTE_CONF
+	bool "Download ppsi.conf from the network at each boot"
+	help
+	  This choice allows to specify an URL so you can download a
+	  custom file using the network. This allows running a bunch
+	  of switches, all with the same configuration but different
+	  configuations that can't just be derived from PORT_PARAMS above.
+
+endchoice
+
+config PTP_CUSTOM_FILENAME
+	string "Pathname for your custom ppsi.conf"
+	depends on PTP_CUSTOM
+	default "/wr/etc/ppsi-custom.conf"
+	help
+	  This is the filename used as ppsi.conf. Please note that the
+	  file is copied to /etc/ppsi.conf when configuration is applied,
+	  and the PTP daemon always picks /etc/ppsi.conf, not this
+	  filename.
+
+config PTP_CONF_URL
+	depends on PTP_REMOTE_CONF
+	string "Download URL (http, ftp, tftp) for custom ppsi.conf"
+	help
+	  Like CONFIG_DOTCONF_URL, this option allows passing HOSTNAME, IPADDR
+	  and MACADDR in the filename, and if a DNS server is configured,
+	  you can use host names.
+	  For example: tftp://morgana/wrs-IPADDR-ppsi.conf
+
+
+menu "Management configuration"
+config SNMP_TRAPSINK_ADDRESS
+	string "Static IP address or name where to send SNMPv1 traps"
+	help
+	  If not empty, the address or name is ussed as "trapsink"
+	  destination in the SNMP configuration file for the switch.
+	  It empty, no v1 traps are generated. If both this and
+	  the following TRAP2SINK_ADDRESS are set, snmpd sends two
+	  traps (one per protocol version). Trapcommunity is "public"
+	  (not configurable so far).
+
+config SNMP_TRAP2SINK_ADDRESS
+	string "Static IP address or name where to send SNMPv2c traps"
+	help
+	  If not empty, the address or name is ussed as "trap2sink"
+	  destination in the SNMP configuration file for the switch.
+	  It empty, no v2c traps are generated. Trapcommunity is "public"
+	  (not configurable so far).
+
+config SNMP_RO_COMMUNITY
+	string "Read-only community name for SNMP V1/V2 management"
+	default "public"
+	help
+	  If not empty, the 'community' name is a sort of password,
+	  that travels as clear text (we don't support encrypted SNMPv3
+	  yet). The default is good for testing, but should be changed
+	  for production. Please note, however, that the switch processes
+	  SNMP only on the CPU Ethernet port (the copper "management" port).
+
+config SNMP_RW_COMMUNITY
+	string "Read-write community name for SNMP V1/V2 management"
+	default "private"
+	help
+	  If not empty, the 'community' name is a sort of password,
+	  that travels as clear text (we don't support encrypted SNMPv3
+	  yet). The default is good for testing, but should be changed
+	  for production. Please note, however, that the switch processes
+	  SNMP only on the CPU Ethernet port (the copper "management" port).
+
+config SNMP_TEMP_THOLD_FPGA
+	int "Threshold level for FPGA temperature"
+	default "80"
+	help
+	  Threshold level for FPGA temperature, when exceeded warning is
+	  notified by SNMP via WR-SWITCH-MIB::wrsTemperatureWarning
+	  Require hal restart after change
+
+config SNMP_TEMP_THOLD_PLL
+	int "Threshold level for PLL temperature"
+	default "80"
+	help
+	  Threshold level for PLL temperature, when exceeded warning is
+	  notified by SNMP via WR-SWITCH-MIB::wrsTemperatureWarning
+	  Require hal restart after change
+
+config SNMP_TEMP_THOLD_PSL
+	int "Threshold level for Power Supply Left (PSL) temperature"
+	default "80"
+	help
+	  Threshold level for Power Supply Left (PSL) temperature, when
+	  exceeded warning is notified by SNMP via
+	  WR-SWITCH-MIB::wrsTemperatureWarning
+	  Require hal restart after change
+
+config SNMP_TEMP_THOLD_PSR
+	int "Threshold level for Power Supply Right (PSR) temperature"
+	default "80"
+	help
+	  Threshold level for Power Supply Right (PSR) temperature, when
+	  exceeded warning is notified by SNMP via
+	  WR-SWITCH-MIB::wrsTemperatureWarning
+	  Require hal restart after change
+
+config SNMP_SWCORESTATUS_DISABLE
+	bool "Force SNMP object wrsSwcoreStatus to be always OK"
+	default false
+	help
+	  Disable checking SNMP object wrsSwcoreStatus"
+
+# config items below are not implemented in the SNMP
+#config SNMP_SWCORESTATUS_HP_FRAME_RATE
+#	int "Maximum allowed rate of HP frames on a port"
+#	depends on !SNMP_SWCORESTATUS_DISABLE
+#	default "0"
+#	help
+#	  Error via SNMP if rate of HP frames on any port exceed given value.
+#
+#config SNMP_SWCORESTATUS_RX_FRAME_RATE
+#	int "Maximum allowed rate of RX frames on a port"
+#	depends on !SNMP_SWCORESTATUS_DISABLE
+#	default "0"
+#	help
+#	  Error via SNMP if rate of RX frames on any port exceed given value.
+#
+#config SNMP_SWCORESTATUS_RX_PRIO_FRAME_RATE
+#	int "Maximum allowed rate of any RX priority"
+#	depends on !SNMP_SWCORESTATUS_DISABLE
+#	default "0"
+#	help
+#	  Error if frame rate of any RX priority exceed given value.
+#
+
+endmenu
+
+menu "External clk2 clock signal configuration"
+config WRSAUXCLK_FREQ
+	string "Frequency of the generated clock signal in MHz"
+	default "10"
+	help
+	  --freq parameter of wrs_auxclk
+	  Desired frequency of the generated clock signal in MHz. Available
+	  range from 4kHz to 250MHz.
+
+config WRSAUXCLK_DUTY
+	string "Duty cycle of the generated clock signal"
+	default "0.5"
+	help
+	  --duty parameter of wrs_auxclk
+	  Desired duty cycle given as a fraction (e.g. 0.5, 0.4).
+
+config WRSAUXCLK_CSHIFT
+	string "Coarse shift of the generated clock signal"
+	default "36"
+	help
+	  --cshift parameter of wrs_auxclk
+	  Coarse shift (granularity 2ns) of the generated clock signal. This
+	  parameter can be used to get desired delay relation between generated
+	  1-PPS and clk2. The delay between 1-PPS and clk2 is constant for
+	  a given bitstream but may be different for various hardware versions
+	  and re-synthesized gateware. Therefore it should be measured and
+	  adjusted only once for given hardware and gateware version.
+
+
+config WRSAUXCLK_SIGDEL
+	string "Signal delay of the generated clock signal"
+	default "0"
+	help
+	  --sigdel parameter of wrs_auxclk
+	  Clock signal generated from the FPGA is cleaned by a discrete
+	  flip-flop. It may happen that generated aux clock is in phase with
+	  the flip-flop clock. In that case it is visible on the oscilloscope
+	  that clk2 clock is jittering by 4ns. The "Signal delay" parameter
+	  allows to add a precise delay to the FPGA-generated clock to avoid
+	  such jitter. This delay is specified in steps, where each step is
+	  around 150ps. This value, same as the "Coarse shift" parameter, is
+	  constant for a given bitstream so should be verified only once.
+
+
+config WRSAUXCLK_PPSHIFT
+	string "Fine signal delay of the generated clock signal"
+	default "0"
+	help
+	  --ppshift parameter of wrs_auxclk
+	  If one needs to precisely align 1-PPS output with the clk2 aux clock
+	  using "Coarse shift" parameter is not enough as it has
+	  4ns granularity. In that case this parameter lets you shift 1-PPS
+	  output by a configured number of 150ps steps. However, please have in
+	  mind that 1-PPS output is used as a reference for WR calibration
+	  procedure. Therefore, once this parameter is modified, the device
+	  should be re-calibrated. Otherwise, 1-PPS output will be shifted
+	  from the WR timescale by <steps>*150ps.
+
+endmenu
+
+menu "NIC throttling configuration"
+config NIC_THROTTLING_ENABLED
+	bool "Enable NIC throttling"
+	default n
+	help
+	  Limit the Rx bandwidth of the traffic that goes from WR ports to
+	  Linux. Throttling can be enabled to prevent Linux using 100% of the
+	  processing power to receive Ethernet frames coming from WR ports to
+	  the CPU.
+
+config NIC_THROTTLING_VAL
+	int "NIC throttling value"
+	depends on NIC_THROTTLING_ENABLED
+	default "4000"
+	range 1 65535
+	help
+	  Value to which bandwith should be limited (in KB/s).
+
+endmenu
+
+menu "Custom boot script configuration"
+config CUSTOM_BOOT_SCRIPT_ENABLED
+	bool "Execute custom script"
+	default n
+	help
+	  Enable execution of a custom script during boot. It can be a local
+	  script placed at /wr/bin/custom_boot_script.sh or downloaded from
+	  a given URL. This script can be used for some exotic configurations
+	  that dot-config does not support. This scipt runs before switching
+	  is enabled.
+
+choice CUSTOM_BOOT_SCRIPT_SOURCE
+	prompt "Source for a custom boot script"
+	depends on CUSTOM_BOOT_SCRIPT_ENABLED
+	default CUSTOM_BOOT_SCRIPT_SOURCE_LOCAL
+	help
+	  Defines the source of a custom boot script. Local or remote.
+
+config CUSTOM_BOOT_SCRIPT_SOURCE_LOCAL
+	bool "Use local custom script"
+	help
+	  Use /wr/bin/custom_boot_script.sh to be executed at boot.
+
+config CUSTOM_BOOT_SCRIPT_SOURCE_REMOTE
+	bool "Use remote custom script"
+	help
+	  Use the URL in CUSTOM_BOOT_SCRIPT_SOURCE_REMOTE_URL to download the
+	  custom boot script.
+
+endchoice
+config CUSTOM_BOOT_SCRIPT_SOURCE_REMOTE_URL
+	string "URL of a custom script"
+	depends on CUSTOM_BOOT_SCRIPT_SOURCE_REMOTE
+	help
+	  URL to the custom script. HOSTNAME, IPADDR and MACADDR are
+	  substituted before retrieving the file.
+
+	  Example:  "tftp://morgana/custom-script-IPADDR"
+
+endmenu
+
+menu "Developer options"
+config MONIT_DISABLE
+	bool "Disable monit"
+	default n
+	help
+	  Disable monit to prevent processes' restarts. It may be useful for
+	  development.
+
+menu "Fan speed control"
+config FAN_HYSTERESIS
+	bool "Use hysteresis to control fan speed"
+	default n
+	help
+	  Disable monit to prevent processes' restarts. It may be useful for
+	  development.
+
+config FAN_HYSTERESIS_T_DISABLE
+	int "Disable fans temperature"
+	default 60
+	range 0 80
+	depends on FAN_HYSTERESIS
+	help
+	  Temperature at which fans are disabled when working in hysteresis mode.
+
+config FAN_HYSTERESIS_T_ENABLE
+	int "Enable fans temperature"
+	default 65
+	range 0 80
+	depends on FAN_HYSTERESIS
+	help
+	  Temperature at which fans are enabled when working in hysteresis mode.
+	  Maximum allowed value is 80
+
+config FAN_HYSTERESIS_PWM_VAL
+	int "Value of fans' PWM"
+	default 100
+	range 4 1000
+	depends on FAN_HYSTERESIS
+	help
+	  PWM value used to drive fans. Range from 4 to 1000.
+
+endmenu # "Fan speed control"
+
+config READ_SFP_DIAG_ENABLE
+	bool "Read SFPs Diagnostic Monitoring"
+	default n
+	help
+	  Let HAL to read Diagnostic Monitoring from SFP's eeprom.
+
+endmenu # "Developer options"
+
+menu "RTU HP mask"
+
+config RTU_HP_MASK_ENABLE
+	bool "Set custom High Priority mask in RTU"
+	default n
+	help
+	  Set the mask which priorities are considered High Priority (this
+	  only concerns the traffic which is fast-forwarded).
+
+
+config RTU_HP_MASK_VAL
+	string "HP mask"
+	default 0
+	depends on RTU_HP_MASK_ENABLE
+	help
+	  Mask with priorities (eg. 0x9 => priority 4 and 0 are considered HP)
+
+
+endmenu
+
+source Kconfig_vlans.in
