@@ -98,6 +98,10 @@ try:
 except getopt.GetoptError:
     print_help(sys.argv[0])
     sys.exit(1)
+
+if len(opts) == 0:
+    print_help(sys.argv[0])
+    sys.exit()
 for opt, arg in opts:
     if opt in ("-h", "--help"):
 	print_help(sys.argv[0])
@@ -125,6 +129,7 @@ for opt, arg in opts:
 
 if (ccde_url != '') and (file_json_in != ''):
     print "Please specify only one --ccde[-dev] or --json"
+    sys.exit(1)
 
 # Get data from CCDE
 if (ccde_url != ''):
