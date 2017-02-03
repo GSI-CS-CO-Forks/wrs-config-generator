@@ -171,34 +171,34 @@ if (file_json_in != ''):
 config_fd = open(config_file, 'w')
 print "Saving dot-config to a file: " + config_file
 print "Switch name %s" % json_data["switchName"]
-print "HW version: %s" % json_data["hardwareVersion"]
-print >>config_fd, "CONFIG_DOTCONF_HW_VERSION=\"%s\"" % json_data["hardwareVersion"]
+print "HW version: %s" % json_data["CONFIG_DOTCONF_HW_VERSION"]
+print >>config_fd, "CONFIG_DOTCONF_HW_VERSION=\"%s\"" % json_data["CONFIG_DOTCONF_HW_VERSION"]
 
-fw_version=json_data["firmwareVersion"]
+fw_version=json_data["CONFIG_DOTCONF_FW_VERSION"]
 if fw_version in fw_version_supported:
     print "FW version: %s" % fw_version
 else:
     print "FW version %s not supported! Exiting!" % fw_version
     sys.exit(1)
-print >>config_fd, "CONFIG_DOTCONF_FW_VERSION=\"%s\"" % json_data["firmwareVersion"]
+print >>config_fd, "CONFIG_DOTCONF_FW_VERSION=\"%s\"" % json_data["CONFIG_DOTCONF_FW_VERSION"]
 
 for config_item in json_data["configurationItems"]:
-    if ((fw_version in items_skip) and (config_item["hardwareCode"] in items_skip[fw_version])):
+    if ((fw_version in items_skip) and (config_item["itemConfig"] in items_skip[fw_version])):
 	# skip configuration item
 	continue
     elif config_item["itemValue"] == "true":
-	print >>config_fd, "%s=y" % config_item["hardwareCode"]
+	print >>config_fd, "%s=y" % config_item["itemConfig"]
     elif config_item["itemValue"] == "false":
-	print >>config_fd, "# %s is not set" % config_item["hardwareCode"]
+	print >>config_fd, "# %s is not set" % config_item["itemConfig"]
     elif config_item["itemValue"] == None:
 	continue
-    elif ((fw_version in items_conv_num) and (config_item["hardwareCode"] in items_conv_num[fw_version])):
-	print >>config_fd, "%s=%u" % (config_item["hardwareCode"], int(config_item["itemValue"]))
+    elif ((fw_version in items_conv_num) and (config_item["itemConfig"] in items_conv_num[fw_version])):
+	print >>config_fd, "%s=%u" % (config_item["itemConfig"], int(config_item["itemValue"]))
     else:
-	print >>config_fd, "%s=\"%s\"" % (config_item["hardwareCode"], config_item["itemValue"])
+	print >>config_fd, "%s=\"%s\"" % (config_item["itemConfig"], config_item["itemValue"])
 
 # Add CONFIG_PORTXX_PARAMS
-for port_item in json_data["ports"]:
+for port_item in json_data["configPorts"]:
     # check the range of ports
     if not (1 <= int(port_item["portNumber"]) <= 18):
 	print "Error: Port " + port_item["portNumber"] + " out of range!"
