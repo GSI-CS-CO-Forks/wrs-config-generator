@@ -212,6 +212,35 @@ for port_item in json_data["configPorts"]:
 	port_item["ptpRole"],
 	port_item["fiber"]
 	)
+# Add CONFIG_SFP00_PARAMS
+for sfp_item in json_data["configSfp"]:
+    # check the range of sfps
+    #if not (0 <= int(sfp_item["sfpId"]) <= 9):
+	#print "Error: Port " + sfp_item["sfpId"] + " out of range!"
+	#continue
+    print >>config_fd, "CONFIG_SFP%s_PARAMS=\"vs=%s,pn=%s," % (
+	sfp_item["sfpId"],
+	sfp_item["vendorName"],
+	sfp_item["model"],
+	),
+    if (sfp_item["serialNumber"] != None):
+	print >>config_fd, "vs=%s," % (sfp_item["serialNumber"]),
+    print >>config_fd, "tx=%u,rx=%u,wl_txrx=%s\"" % (
+	int(sfp_item["dtx"]),
+	int(sfp_item["drx"]),
+	sfp_item["wavelengths"]
+	)
+# Add CONFIG_SFP00_PARAMS
+for fiber_item in json_data["configFibers"]:
+    # check the range of fibers
+    #if not (0 <= int(fiber_item["fiberId"]) <= 3):
+	#print "Error: Port " + fiber_item["fiberId"] + " out of range!"
+	#continue
+    print >>config_fd, "CONFIG_FIBER%s_PARAMS=\"alpha_%s=%s\"" % (
+	fiber_item["fiberId"],
+	fiber_item["waveLength"],
+	fiber_item["alpha"],
+	)
 
 # close dot-config file
 config_fd.close()
