@@ -58,11 +58,11 @@ items_conv_num = {
 def print_help(prog_name):
     print """
     Usage:
-    """ + prog_name + """ --json <file> [--config=<file>] [--use-defaults]
-    """ + prog_name + """ <--ccde|--ccde-dev> --dev=<name> --user <user> [--password] [--ccde-out=<file>] [--config=<file>] [--use-defaults]
+    """ + prog_name + """ --json=<file> [--config=<file>] [--use-defaults]
+    """ + prog_name + """ <--ccde|--ccde-dev> --dev=<name> --user=<user> [--password=<password>] [--ccde-out=<file>] [--config=<file>] [--use-defaults]
 
     Options:
-    --json <file>		Get the data directly from file
+    --json=<file>		Get the data directly from file
     --ccde			Get the data from the CCDE
     --ccde-dev			Get the data from the dev version of CCDE
     --ccde-out=<file>		Save data from CCDE to the file. Requires ccde or ccde-dev to be used
