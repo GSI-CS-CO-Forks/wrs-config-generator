@@ -34,13 +34,21 @@ items_conv_num = {
 		"CONFIG_SNMP_TEMP_THOLD_FPGA",
 		"CONFIG_SNMP_TEMP_THOLD_PLL",
 		"CONFIG_SNMP_TEMP_THOLD_PSL",
-		"CONFIG_SNMP_TEMP_THOLD_PSR"
+		"CONFIG_SNMP_TEMP_THOLD_PSR",
+		"CONFIG_NIC_THROTTLING_VAL",
+		"CONFIG_FAN_HYSTERESIS_T_ENABLE",
+		"CONFIG_FAN_HYSTERESIS_T_DISABLE",
+		"CONFIG_FAN_HYSTERESIS_PWM_VAL"
 		],
 	"5.0-dev" : [
 		"CONFIG_SNMP_TEMP_THOLD_FPGA",
 		"CONFIG_SNMP_TEMP_THOLD_PLL",
 		"CONFIG_SNMP_TEMP_THOLD_PSL",
-		"CONFIG_SNMP_TEMP_THOLD_PSR"
+		"CONFIG_SNMP_TEMP_THOLD_PSR",
+		"CONFIG_NIC_THROTTLING_VAL",
+		"CONFIG_FAN_HYSTERESIS_T_ENABLE",
+		"CONFIG_FAN_HYSTERESIS_T_DISABLE",
+		"CONFIG_FAN_HYSTERESIS_PWM_VAL"
 		]
 
 	}
@@ -220,16 +228,16 @@ for port_item in json_data["configPorts"]:
 # Add CONFIG_SFP00_PARAMS
 for sfp_item in json_data["configSfp"]:
     # check the range of sfps
-    #if not (0 <= int(sfp_item["sfpId"]) <= 9):
-	#print "Error: Port " + sfp_item["sfpId"] + " out of range!"
-	#continue
-    print >>config_fd, "CONFIG_SFP%s_PARAMS=\"vs=%s,pn=%s," % (
-	sfp_item["sfpId"],
+    if not (0 <= int(sfp_item["sfpId"]) <= 9):
+	print "Error: Port " + sfp_item["sfpId"] + " out of range!"
+	continue
+    print >>config_fd, "CONFIG_SFP%02u_PARAMS=\"vs=%s,pn=%s," % (
+	int(sfp_item["sfpId"]),
 	sfp_item["vendorName"],
-	sfp_item["model"],
+	sfp_item["partNumber"],
 	),
-    if (sfp_item["serialNumber"] != None):
-	print >>config_fd, "vs=%s," % (sfp_item["serialNumber"]),
+    if (sfp_item["vendorSerial"] != None):
+	print >>config_fd, "vs=%s," % (sfp_item["vendorSerial"]),
     print >>config_fd, "tx=%u,rx=%u,wl_txrx=%s\"" % (
 	int(sfp_item["dtx"]),
 	int(sfp_item["drx"]),
@@ -238,11 +246,11 @@ for sfp_item in json_data["configSfp"]:
 # Add CONFIG_SFP00_PARAMS
 for fiber_item in json_data["configFibers"]:
     # check the range of fibers
-    #if not (0 <= int(fiber_item["fiberId"]) <= 3):
-	#print "Error: Port " + fiber_item["fiberId"] + " out of range!"
-	#continue
-    print >>config_fd, "CONFIG_FIBER%s_PARAMS=\"alpha_%s=%s\"" % (
-	fiber_item["fiberId"],
+    if not (0 <= int(fiber_item["fiberId"]) <= 3):
+	print "Error: Port " + fiber_item["fiberId"] + " out of range!"
+	continue
+    print >>config_fd, "CONFIG_FIBER%02u_PARAMS=\"alpha_%s=%s\"" % (
+	int(fiber_item["fiberId"]),
 	fiber_item["waveLength"],
 	fiber_item["alpha"],
 	)
