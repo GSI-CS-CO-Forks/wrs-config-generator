@@ -170,6 +170,11 @@ if (file_json_in != ''):
 
 config_fd = open(config_file, 'w')
 print "Saving dot-config to a file: " + config_file
+
+if not ("switchName" in json_data):
+    print "Switch %s does not exist in DB" % ccde_dev_name
+    sys.exit(1)
+
 print "Switch name %s" % json_data["switchName"]
 print "HW version: %s" % json_data["CONFIG_DOTCONF_HW_VERSION"]
 print >>config_fd, "CONFIG_DOTCONF_HW_VERSION=\"%s\"" % json_data["CONFIG_DOTCONF_HW_VERSION"]
