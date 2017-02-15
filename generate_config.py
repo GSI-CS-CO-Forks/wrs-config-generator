@@ -28,6 +28,22 @@ items_skip = {
 		]
 	}
 
+# configuration items to add
+items_add = {
+	"5.0" : [
+		"# CONFIG_VLANS_ENABLE is not set",
+		"CONFIG_KEEP_ROOTFS=y",
+		'CONFIG_BR2_CONFIGFILE="wrs_release_br2_config"',
+		'CONFIG_ROOT_PWD_CLEAR=""'
+		],
+	"5.0-dev" : [
+		"# CONFIG_VLANS_ENABLE is not set",
+		"CONFIG_KEEP_ROOTFS=y",
+		'CONFIG_BR2_CONFIGFILE="wrs_release_br2_config"',
+		'CONFIG_ROOT_PWD_CLEAR=""'
+		],
+	}
+
 # configuration items to convert from string to int
 items_conv_num = {
 	"5.0" : [
@@ -254,6 +270,10 @@ for fiber_item in json_data["configFibers"]:
 	fiber_item["waveLength"],
 	fiber_item["alpha"],
 	)
+
+# Add items from items_add
+for extra_item in items_add[fw_version]:
+    print >>config_fd, "%s" % (extra_item)
 
 # close dot-config file
 config_fd.close()
