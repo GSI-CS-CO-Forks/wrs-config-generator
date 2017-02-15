@@ -69,6 +69,9 @@ items_conv_num = {
 
 	}
 
+PORT_DB_range=range(1, 19) # 1..18
+SFP_DB_range=range(0, 10) # 0..9
+FIBER_DB_range=range(0, 4) # 0..3
 # -----------------------------------------------------------------------------
 
 def print_help(prog_name):
@@ -228,27 +231,41 @@ for config_item in json_data["configurationItems"]:
 
 # Add CONFIG_PORTXX_PARAMS
 for port_item in json_data["configPorts"]:
+    port_id = int(port_item["portNumber"])
     # check the range of ports
-    if not (1 <= int(port_item["portNumber"]) <= 18):
+    if not (1 <= port_id <= 18):
 	print "Error: Port " + port_item["portNumber"] + " out of range!"
 	continue
+
+    # remove current port id from the list
+    PORT_DB_range.remove(port_id)
     print >>config_fd, "CONFIG_PORT%02u_PARAMS=\"name=wri%u,proto=%s,tx=%u,rx=%u,role=%s,fiber=%s\""	% (
-	int(port_item["portNumber"]),
-	int(port_item["portNumber"]),
+	port_id,
+	port_id,
 	port_item["proto"],
 	int(port_item["dtx"]),
 	int(port_item["drx"]),
 	port_item["ptpRole"],
 	port_item["fiber"]
 	)
+
+# add empty port entries if needed
+for i in PORT_DB_range:
+    print >>config_fd, "CONFIG_PORT%02u_PARAMS=\"\"" % (i)
+
+
 # Add CONFIG_SFP00_PARAMS
 for sfp_item in json_data["configSfp"]:
+    sfp_id = int(sfp_item["sfpId"])
     # check the range of sfps
-    if not (0 <= int(sfp_item["sfpId"]) <= 9):
+    if not (0 <= sfp_id <= 9):
 	print "Error: Port " + sfp_item["sfpId"] + " out of range!"
 	continue
+
+    # remove current sfp id from the list
+    SFP_DB_range.remove(sfp_id)
     print >>config_fd, "CONFIG_SFP%02u_PARAMS=\"vs=%s,pn=%s," % (
-	int(sfp_item["sfpId"]),
+	sfp_id,
 	sfp_item["vendorName"],
 	sfp_item["partNumber"],
 	),
@@ -259,17 +276,30 @@ for sfp_item in json_data["configSfp"]:
 	int(sfp_item["drx"]),
 	sfp_item["wavelength"]
 	)
+
+# add empty sfp entries if needed
+for i in SFP_DB_range:
+    print >>config_fd, "CONFIG_SFP%02u_PARAMS=\"\"" % (i)
+
+
 # Add CONFIG_SFP00_PARAMS
 for fiber_item in json_data["configFibers"]:
+    fiber_id = int(fiber_item["fiberId"])
     # check the range of fibers
-    if not (0 <= int(fiber_item["fiberId"]) <= 3):
+    if not (0 <= fiber_id <= 3):
 	print "Error: Port " + fiber_item["fiberId"] + " out of range!"
 	continue
+    # remove current fiber id from the list
+    FIBER_DB_range.remove(fiber_id)
     print >>config_fd, "CONFIG_FIBER%02u_PARAMS=\"alpha_%s=%s\"" % (
-	int(fiber_item["fiberId"]),
+	fiber_id,
 	fiber_item["waveLength"],
 	fiber_item["alpha"],
 	)
+
+# add empty fiber entries if needed
+for i in FIBER_DB_range:
+    print >>config_fd, "CONFIG_FIBER%02u_PARAMS=\"\"" % (i)
 
 # Add items from items_add
 for extra_item in items_add[fw_version]:
