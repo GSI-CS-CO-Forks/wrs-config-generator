@@ -241,7 +241,7 @@ for sfp_item in json_data["configSfp"]:
     print >>config_fd, "tx=%u,rx=%u,wl_txrx=%s\"" % (
 	int(sfp_item["dtx"]),
 	int(sfp_item["drx"]),
-	sfp_item["wavelengths"]
+	sfp_item["wavelength"]
 	)
 # Add CONFIG_SFP00_PARAMS
 for fiber_item in json_data["configFibers"]:
