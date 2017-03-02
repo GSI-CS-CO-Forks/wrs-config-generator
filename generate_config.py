@@ -91,6 +91,11 @@ def print_help(prog_name):
     --dev=<name>		Specify device name
     --use-defaults		Use defaults for configuration items not defined in json/CCDE
     """
+    print "Script version:",
+    # the directory of the script being run
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    print os.popen("cd "+script_dir+"; git describe --always --dirty").read()
+
 
 def get_data_ccde(wrs_name, url, user, password):
     authData = base64.encodestring('%s:%s' % (user, password)).replace('\n', '')
