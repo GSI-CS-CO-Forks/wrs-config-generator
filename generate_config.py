@@ -75,22 +75,21 @@ FIBER_DB_range=range(0, 4) # 0..3
 # -----------------------------------------------------------------------------
 
 def print_help(prog_name):
-    print """
-    Usage:
-    """ + prog_name + """ --json=<file> [--config=<file>] [--use-defaults]
-    """ + prog_name + """ <--ccde|--ccde-dev> --dev=<name> --user=<user> [--password=<password>] [--ccde-out=<file>] [--config=<file>] [--use-defaults]
+    print """Usage:
+""" + prog_name + """ --json=<file> [--config=<file>] [--use-defaults]
+""" + prog_name + """ <--ccde|--ccde-dev> --dev=<name> --user=<user> [--password=<password>] [--ccde-out=<file>] [--config=<file>] [--use-defaults]
 
-    Options:
-    --json=<file>		Get the data directly from file
-    --ccde			Get the data from the CCDE
-    --ccde-dev			Get the data from the dev version of CCDE
-    --ccde-out=<file>		Save data from CCDE to the file. Requires ccde or ccde-dev to be used
-    --user=<user>		User to CCDE. If not specified system username will be used.
-    --password=<password>	Password to CCDE. If not provided it will be prompted.
-    --config=<file>		Save generated dot-config in the file. By default in the file "dot-config".
-    --dev=<name>		Specify device name
-    --use-defaults		Use defaults for configuration items not defined in json/CCDE
-    """
+Options:
+--json=<file>		Get the data directly from file
+--ccde			Get the data from the CCDE
+--ccde-dev		Get the data from the dev version of CCDE
+--ccde-out=<file>	Save data from CCDE to the file. Requires ccde or ccde-dev to be used
+--user=<user>		User to CCDE. If not specified system username will be used.
+--password=<password>	Password to CCDE. If not provided it will be prompted.
+--config=<file>		Save generated dot-config in the file. By default in the file "dot-config".
+--dev=<name>		Specify device name
+--use-defaults		Use defaults for configuration items not defined in json/CCDE
+"""
     print "Script version:",
     # the directory of the script being run
     script_dir = os.path.dirname(os.path.abspath(__file__))
