@@ -99,7 +99,7 @@ Options:
 def get_data_ccde(wrs_name, url, user, password):
     authData = base64.encodestring('%s:%s' % (user, password)).replace('\n', '')
     s = requests.Session()
-    s.post(url + 'login', data={'authentication':authData}, verify=False)
+    s.post(url + 'acw/login', data={'authentication':authData}, verify=False)
     r = s.get(url + 'switches/' + wrs_name + '/configuration', verify=False)
     return r.text
 
