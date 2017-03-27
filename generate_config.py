@@ -76,8 +76,8 @@ FIBER_DB_range=range(0, 4) # 0..3
 
 def print_help(prog_name):
     print """Usage:
-""" + prog_name + """ --json=<file> [--config=<file>] [--use-defaults]
-""" + prog_name + """ <--ccde|--ccde-dev> --dev=<name> --user=<user> [--password=<password>] [--ccde-out=<file>] [--config=<file>] [--use-defaults]
+""" + prog_name + """ --json=<file> [--config=<file>] [--no-use-defaults]
+""" + prog_name + """ <--ccde|--ccde-dev> --dev=<name> --user=<user> [--password=<password>] [--ccde-out=<file>] [--config=<file>] [--no-use-defaults]
 
 Options:
 --json=<file>		Get the data directly from file
@@ -88,7 +88,7 @@ Options:
 --password=<password>	Password to CCDE. If not provided it will be prompted.
 --config=<file>		Save generated dot-config in the file. By default in the file "dot-config".
 --dev=<name>		Specify device name
---use-defaults		Use defaults for configuration items not defined in json/CCDE
+--no-use-defaults	Don't use defaults for configuration items not defined in json/CCDE
 """
     print "Script version:",
     # the directory of the script being run
@@ -116,7 +116,7 @@ config_file = "dot-config"
 ccde_json_file = ''
 ccde_dev_name = ''
 file_json_in = ''
-config_use_defaults = 'no'
+config_use_defaults = 'yes'
 
 url_ccde = 'https://ccde.cern.ch:9094/api/'
 url_ccde_dev = 'https://ccde-dev.cern.ch:9094/api/'
@@ -125,7 +125,7 @@ try:
     opts, args = getopt.getopt(sys.argv[1:],"h",
 			       ["help", "ccde", "ccde-dev", "json=", "config=",
 				"ccde-out=", "user=", "password=", "dev=",
-				"use-defaults"])
+				"no-use-defaults"])
 except getopt.GetoptError:
     print_help(sys.argv[0])
     sys.exit(1)
@@ -153,8 +153,8 @@ for opt, arg in opts:
 	ccde_password = arg
     elif opt == "--dev":
 	ccde_dev_name = arg
-    elif opt == "--use-defaults":
-	config_use_defaults = "yes"
+    elif opt == "--no-use-defaults":
+	config_use_defaults = "no"
     else:
 	print "unknown parameter" + opt
 
