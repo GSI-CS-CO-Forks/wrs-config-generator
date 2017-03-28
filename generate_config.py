@@ -1,5 +1,8 @@
 #!/usr/bin/env python2.7
 
+# Adam Wujek CERN 2017
+#
+
 import json
 import requests
 import base64
@@ -76,14 +79,15 @@ FIBER_DB_range=range(0, 4) # 0..3
 
 def print_help(prog_name):
     print """Usage:
-""" + prog_name + """ --json=<file> [--config=<file>] [--no-use-defaults]
+""" + prog_name + """ <--json=<file>|--stdin> [--config=<file>] [--no-use-defaults]
 """ + prog_name + """ <--ccde|--ccde-dev> --dev=<name> --user=<user> [--password=<password>] [--ccde-out=<file>] [--config=<file>] [--no-use-defaults]
 
 Options:
---json=<file>		Get the data directly from file
---ccde			Get the data from the CCDE
---ccde-dev		Get the data from the dev version of CCDE
+--json=<file>		Get the json data directly from file
+--ccde			Get the json data from the CCDE
+--ccde-dev		Get the json data from the dev version of CCDE
 --ccde-out=<file>	Save data from CCDE to the file. Requires ccde or ccde-dev to be used
+--stdin			Get the json data from stdin
 --user=<user>		User to CCDE. If not specified system username will be used.
 --password=<password>	Password to CCDE. If not provided it will be prompted.
 --config=<file>		Save generated dot-config in the file. By default in the file "dot-config".
@@ -114,6 +118,7 @@ ccde_user = ''
 ccde_password = ''
 config_file = "dot-config"
 ccde_json_file = ''
+json_stdin = 'no'
 ccde_dev_name = ''
 file_json_in = ''
 config_use_defaults = 'yes'
@@ -123,7 +128,7 @@ url_ccde_dev = 'https://ccde-dev.cern.ch:9094/api/'
 
 try:
     opts, args = getopt.getopt(sys.argv[1:],"h",
-			       ["help", "ccde", "ccde-dev", "json=", "config=",
+			       ["help", "ccde", "ccde-dev", "json=", "stdin", "config=",
 				"ccde-out=", "user=", "password=", "dev=",
 				"no-use-defaults"])
 except getopt.GetoptError:
@@ -143,6 +148,8 @@ for opt, arg in opts:
 	ccde_url = 'https://ccde-dev.cern.ch:9094/api/'
     elif opt == "--json":
 	file_json_in = arg
+    elif opt == "--stdin":
+	json_stdin = 'yes'
     elif opt == "--config":
 	config_file = arg
     elif opt == "--ccde-out":
@@ -158,8 +165,17 @@ for opt, arg in opts:
     else:
 	print "unknown parameter" + opt
 
-if (ccde_url != '') and (file_json_in != ''):
-    print "Please specify only one --ccde[-dev] or --json"
+# count number of provided sources
+source_n = (int)(ccde_url != '') \
+	 + (int)(file_json_in != '') \
+	 + (int)(json_stdin != 'no')
+
+if (source_n > 1):
+    print "Please specify only one --ccde[-dev], --json or --stdin"
+    sys.exit(1)
+
+if (source_n < 1):
+    print "Please specify source of json data. One of --ccde[-dev], --json or --stdin"
     sys.exit(1)
 
 # Get data from CCDE
@@ -198,6 +214,21 @@ if (file_json_in != ''):
 	    print "Error: Syntax error in file: " + file_json_in
 	    sys.exit(1)
     data_file.close()
+
+# Get data from stdin
+if (json_stdin == 'yes'):
+    stdin_data = ""
+    while True:
+	stdin_line = sys.stdin.readline()
+	if len(stdin_line) == 0:
+	    break
+	stdin_data += stdin_line
+    # try to convert stdin_data to json
+    try:
+	json_data = json.loads(stdin_data)
+    except ValueError:
+	print "Error: Syntax error in stdin data"
+	sys.exit(1)
 
 config_fd = open(config_file, 'w')
 print "Saving dot-config to a file: " + config_file
@@ -314,9 +345,9 @@ config_fd.close()
 
 # the directory of the script being run
 script_dir = os.path.dirname(os.path.abspath(__file__))
+# find the abs path of dot-config file
 config_file_abs = os.path.dirname(os.path.abspath(config_file)) + "/" \
 				  + os.path.basename(config_file)
-print "config_file_abs:" + config_file_abs
 # set the path to Kconfig from particular FW release
 kconfig_path = script_dir + "/kconfigs/v" + fw_version
 # KCONFIG_CONFIG points to the dot-config file
