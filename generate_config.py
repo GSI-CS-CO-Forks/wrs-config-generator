@@ -314,12 +314,18 @@ config_fd.close()
 
 # the directory of the script being run
 script_dir = os.path.dirname(os.path.abspath(__file__))
-
+config_file_abs = os.path.dirname(os.path.abspath(config_file)) + "/" \
+				  + os.path.basename(config_file)
+print "config_file_abs:" + config_file_abs
 # set the path to Kconfig from particular FW release
 kconfig_path = script_dir + "/kconfigs/v" + fw_version
 # KCONFIG_CONFIG points to the dot-config file
 verify_dot_config_env = os.environ.copy()
-verify_dot_config_env["KCONFIG_CONFIG"] = "../../" + config_file
+verify_dot_config_env["KCONFIG_CONFIG"] = config_file_abs
+# Avoid creating temp file in the same dir as conf binary. When temp file and
+# the destination file were in the different drives, conf failed to generate
+# final config. As a side effect we don't keep .old file.
+verify_dot_config_env["KCONFIG_OVERWRITECONFIG"] = "y"
 verify_dot_config_command = "../../bin/conf --listnewconfig Kconfig"
 
 process = subprocess.Popen(verify_dot_config_command.split(),
