@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Adam Wujek CERN 2017
+#
+
+set -e
+#WRS_CONFIG_DIR="/nfs/cs-ccr-felab/sys/boot/white_rabbit"
+WRS_CONFIG_DIR="/tmp"
+GEN_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# add hostname into the tmpfile name
+tmp_path="/tmp"
+tmp_name=$(mktemp -u  $tmp_path/wrs.XXXXXX)
+tmp_json="$tmp_name"-json
+cat > "$tmp_json"
+device_name_tmp=`cat "$tmp_json" | grep "switchName"`
+if [ -n "$device_name_tmp" ]; then
+    IFS=":, " read -r x device_name <<< $device_name_tmp
+    # strip quotas
+    device_name=${device_name//\"/}
+    tmp_json_new="$tmp_name"-"$device_name"-json
+    mv -f "$tmp_json" "$tmp_json_new"
+    tmp_json="$tmp_json_new"
+else
+    echo "Device name (switchName) not found in the stdin"
+    rm "$tmp_json"
+    exit 1
+fi
+tmp_config="$tmp_name"-dot-config
+# Uncomment to remove dot-config, even when this script fails
+# exec 3>"$tmp_json";rm "$tmp_json"
+"$GEN_DIR"/generate_config --json="$tmp_json" --config="$tmp_config"
+rm "$tmp_json"
+mv -f "$tmp_config" "$WRS_CONFIG_DIR"/config-"$device_name"
