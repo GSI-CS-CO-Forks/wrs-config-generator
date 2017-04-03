@@ -5,7 +5,8 @@
 
 set -e
 #WRS_CONFIG_DIR="/nfs/cs-ccr-felab/sys/boot/white_rabbit"
-WRS_CONFIG_DIR="/tmp"
+# for SCP
+WRS_CONFIG_DIR="cs-ccr-felab:/acc/sys/boot/white_rabbit"
 GEN_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # add hostname into the tmpfile name
@@ -31,4 +32,8 @@ tmp_config="$tmp_name"-dot-config
 # exec 3>"$tmp_json";rm "$tmp_json"
 "$GEN_DIR"/generate_config --json="$tmp_json" --config="$tmp_config"
 rm "$tmp_json"
-mv -f "$tmp_config" "$WRS_CONFIG_DIR"/config-"$device_name"
+chmod g+w "$tmp_config"
+# use SCP since /nfs/cs-ccr-felab/sys/boot/white_rabbit is mounted ro on cs-ccr-apop3
+scp -p "$tmp_config" cs-ccr-felab:/acc/sys/boot/white_rabbit/config-"$device_name"
+#mv -f "$tmp_config" "$WRS_CONFIG_DIR"/config-"$device_name"
+rm "$tmp_config"
