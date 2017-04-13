@@ -299,7 +299,7 @@ for sfp_item in json_data["configSfp"]:
 
     # remove current sfp id from the list
     SFP_DB_range.remove(sfp_id)
-    print >>config_fd, "CONFIG_SFP%02u_PARAMS=\"vs=%s,pn=%s," % (
+    print >>config_fd, "CONFIG_SFP%02u_PARAMS=\"vn=%s,pn=%s," % (
 	sfp_id,
 	sfp_item["vendorName"],
 	sfp_item["partNumber"],
