@@ -15,6 +15,7 @@ tmp_name=$(mktemp -u  $tmp_path/wrs.XXXXXX)
 tmp_json="$tmp_name"-json
 cat > "$tmp_json"
 device_name_tmp=`cat "$tmp_json" | grep "switchName"`
+boot_server_tmp=`cat "$tmp_json" | grep "landbHcpNextServer"`
 if [ -n "$device_name_tmp" ]; then
     IFS=":, " read -r x device_name <<< $device_name_tmp
     # strip quotas
@@ -27,6 +28,18 @@ else
     rm "$tmp_json"
     exit 1
 fi
+
+if [ -n "boot_server_tmp" ]; then
+    IFS=":, " read -r x boot_server <<< $boot_server_tmp
+    # strip quotas
+    boot_server=${boot_server//\"/}
+    # lower case (For some reason ssh keys fails when hostname is capitalized)
+    boot_server=${boot_server,,}
+else
+    echo "Boot server (landbHcpNextServer) not found in the stdin. Using default cs-ccr-felab."
+    boot_server="cs-ccr-felab"
+fi
+
 tmp_config="$tmp_name"-dot-config
 # Uncomment to remove dot-config, even when this script fails
 # exec 3>"$tmp_json";rm "$tmp_json"
@@ -34,6 +47,6 @@ tmp_config="$tmp_name"-dot-config
 rm "$tmp_json"
 chmod g+w "$tmp_config"
 # use SCP since /nfs/cs-ccr-felab/sys/boot/white_rabbit is mounted ro on cs-ccr-apop3
-scp -p "$tmp_config" cs-ccr-felab:/acc/sys/boot/white_rabbit/config-"$device_name"
+scp -p "$tmp_config" "$boot_server":/acc/sys/boot/white_rabbit/config-"$device_name"
 #mv -f "$tmp_config" "$WRS_CONFIG_DIR"/config-"$device_name"
 rm "$tmp_config"
