@@ -10,6 +10,7 @@ import sys, getopt
 import getpass
 import subprocess
 import os
+import time
 
 # Supported FW versions
 fw_version_supported = [
@@ -269,6 +270,11 @@ else:
     print "FW version %s not supported! Exiting!" % fw_version
     sys.exit(1)
 print >>config_fd, "CONFIG_DOTCONF_FW_VERSION=\"%s\"" % json_data["CONFIG_DOTCONF_FW_VERSION"]
+
+# get the current time
+dotconf_info=time.strftime("%Y-%m-%d+%H:%M:%S")
+print "dotconf_info: %s" % dotconf_info 
+print >>config_fd, "CONFIG_DOTCONF_INFO=\"gen_time=%s\"" % dotconf_info
 
 for config_item in json_data["configurationItems"]:
     if ((fw_version in items_skip) and (config_item["itemConfig"] in items_skip[fw_version])):
