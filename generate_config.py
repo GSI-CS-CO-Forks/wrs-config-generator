@@ -14,12 +14,18 @@ import os
 # Supported FW versions
 fw_version_supported = [
 	"5.0",
+	"5.0.1",
 	"5.0-dev"
 	]
 
 # configuration items to skip
 items_skip = {
 	"5.0" : [
+		"CONFIG_SNMP_SWCORESTATUS_HP_FRAME_RATE",
+		"CONFIG_SNMP_SWCORESTATUS_RX_FRAME_RATE",
+		"CONFIG_SNMP_SWCORESTATUS_RX_PRIO_FRAME_RATE"
+		],
+	"5.0.1" : [
 		"CONFIG_SNMP_SWCORESTATUS_HP_FRAME_RATE",
 		"CONFIG_SNMP_SWCORESTATUS_RX_FRAME_RATE",
 		"CONFIG_SNMP_SWCORESTATUS_RX_PRIO_FRAME_RATE"
@@ -34,6 +40,12 @@ items_skip = {
 # configuration items to add
 items_add = {
 	"5.0" : [
+		"# CONFIG_VLANS_ENABLE is not set",
+		"CONFIG_KEEP_ROOTFS=y",
+		'CONFIG_BR2_CONFIGFILE="wrs_release_br2_config"',
+		'CONFIG_ROOT_PWD_CLEAR=""'
+		],
+	"5.0.1" : [
 		"# CONFIG_VLANS_ENABLE is not set",
 		"CONFIG_KEEP_ROOTFS=y",
 		'CONFIG_BR2_CONFIGFILE="wrs_release_br2_config"',
@@ -59,6 +71,16 @@ items_conv_num = {
 		"CONFIG_FAN_HYSTERESIS_T_DISABLE",
 		"CONFIG_FAN_HYSTERESIS_PWM_VAL"
 		],
+	"5.0.1" : [
+		"CONFIG_SNMP_TEMP_THOLD_FPGA",
+		"CONFIG_SNMP_TEMP_THOLD_PLL",
+		"CONFIG_SNMP_TEMP_THOLD_PSL",
+		"CONFIG_SNMP_TEMP_THOLD_PSR",
+		"CONFIG_NIC_THROTTLING_VAL",
+		"CONFIG_FAN_HYSTERESIS_T_ENABLE",
+		"CONFIG_FAN_HYSTERESIS_T_DISABLE",
+		"CONFIG_FAN_HYSTERESIS_PWM_VAL"
+		],
 	"5.0-dev" : [
 		"CONFIG_SNMP_TEMP_THOLD_FPGA",
 		"CONFIG_SNMP_TEMP_THOLD_PLL",
@@ -69,7 +91,6 @@ items_conv_num = {
 		"CONFIG_FAN_HYSTERESIS_T_DISABLE",
 		"CONFIG_FAN_HYSTERESIS_PWM_VAL"
 		]
-
 	}
 
 PORT_DB_range=range(1, 19) # 1..18
