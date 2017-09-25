@@ -10,7 +10,6 @@ RUN_SCRIPT="$0".py
 declare -a PYTHON_BIN_LIST
 
 #list of python binaries to try
-PYTHON_BIN_LIST+=("/acc/dsc/lab/L866/python2.7/bin/python2.7")
 PYTHON_BIN_LIST+=("/usr/bin/python2.7")
 
 

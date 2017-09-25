@@ -4,7 +4,7 @@
 #
 
 import json
-import requests
+#import requests
 import base64
 import sys, getopt
 import getpass
