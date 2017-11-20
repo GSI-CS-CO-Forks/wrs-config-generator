@@ -126,7 +126,7 @@ def get_data_ccde(wrs_name, url, user, password):
     authData = base64.encodestring('%s:%s' % (user, password)).replace('\n', '')
     s = requests.Session()
     s.post(url + 'acw/login', data={'authentication':authData}, verify=False)
-    r = s.get(url + 'switches/' + wrs_name + '/configuration', verify=False)
+    r = s.get(url + 'whiterabbit/switches/' + wrs_name + '/configuration', verify=False)
     return r.text
 
 
@@ -165,9 +165,9 @@ for opt, arg in opts:
 	print_help(sys.argv[0])
 	sys.exit()
     elif opt == "--ccde":
-	ccde_url = 'https://ccde.cern.ch:9094/api/'
+	ccde_url = url_ccde
     elif opt == "--ccde-dev":
-	ccde_url = 'https://ccde-dev.cern.ch:9094/api/'
+	ccde_url = url_ccde_dev
     elif opt == "--json":
 	file_json_in = arg
     elif opt == "--stdin":
