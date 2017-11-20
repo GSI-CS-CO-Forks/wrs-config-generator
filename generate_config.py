@@ -41,19 +41,16 @@ items_skip = {
 # configuration items to add
 items_add = {
 	"5.0" : [
-		"# CONFIG_VLANS_ENABLE is not set",
 		"CONFIG_KEEP_ROOTFS=y",
 		'CONFIG_BR2_CONFIGFILE="wrs_release_br2_config"',
 		'CONFIG_ROOT_PWD_CLEAR=""'
 		],
 	"5.0.1" : [
-		"# CONFIG_VLANS_ENABLE is not set",
 		"CONFIG_KEEP_ROOTFS=y",
 		'CONFIG_BR2_CONFIGFILE="wrs_release_br2_config"',
 		'CONFIG_ROOT_PWD_CLEAR=""'
 		],
 	"5.0-dev" : [
-		"# CONFIG_VLANS_ENABLE is not set",
 		"CONFIG_KEEP_ROOTFS=y",
 		'CONFIG_BR2_CONFIGFILE="wrs_release_br2_config"',
 		'CONFIG_ROOT_PWD_CLEAR=""'
@@ -131,6 +128,107 @@ def get_data_ccde(wrs_name, url, user, password):
 
 
 
+def fill_vlans(config_fd, json_data):
+    # enable VLANs
+    print >>config_fd, "CONFIG_VLANS_ENABLE=y"
+    fill_vlans_ports(config_fd, json_data)
+    fill_vlans_vlan(config_fd, json_data)
+
+
+
+def fill_vlans_ports(config_fd, json_data):
+    for vlan_port_data in json_data["configVlanPorts"]:
+	vlanPortMode = vlan_port_data["vlanPortMode"]
+
+	if vlanPortMode == "access":
+	    print >>config_fd, "CONFIG_VLANS_PORT%02u_MODE_ACCESS=y" % int(vlan_port_data["portNumber"])
+
+	    if vlan_port_data["vlanPortUntag"] == "true":
+		print >>config_fd, "CONFIG_VLANS_PORT%02u_UNTAG_ALL=y" % int(vlan_port_data["portNumber"])
+		print >>config_fd, "# CONFIG_VLANS_PORT%02u_UNTAG_NONE is not set" % int(vlan_port_data["portNumber"])
+	    else:
+		print >>config_fd, "CONFIG_VLANS_PORT%02u_UNTAG_NONE=y" % int(vlan_port_data["portNumber"])
+		print >>config_fd, "# CONFIG_VLANS_PORT%02u_UNTAG_ALL is not set" % int(vlan_port_data["portNumber"])
+	else:
+	     print >>config_fd, "# CONFIG_VLANS_PORT%02u_MODE_ACCESS is not set" % int(vlan_port_data["portNumber"])
+
+	if vlanPortMode == "trunk":
+	    print >>config_fd, "CONFIG_VLANS_PORT%02u_MODE_TRUNK=y" % int(vlan_port_data["portNumber"])
+	else:
+	     print >>config_fd, "# CONFIG_VLANS_PORT%02u_MODE_TRUNK is not set" % int(vlan_port_data["portNumber"])
+
+	if vlanPortMode == "unqualified":
+	    print >>config_fd, "CONFIG_VLANS_PORT%02u_MODE_UNQUALIFIED=y" % int(vlan_port_data["portNumber"])
+	else:
+	     print >>config_fd, "# CONFIG_VLANS_PORT%02u_MODE_UNQUALIFIED is not set" % int(vlan_port_data["portNumber"])
+
+	if vlanPortMode == "disabled":
+	    print >>config_fd, "CONFIG_VLANS_PORT%02u_MODE_DISABLED=y" % int(vlan_port_data["portNumber"])
+	else:
+	     print >>config_fd, "# CONFIG_VLANS_PORT%02u_MODE_DISABLED is not set" % int(vlan_port_data["portNumber"])
+
+
+	if vlan_port_data["vlanPortPrio"] != None:
+	    print >>config_fd, "CONFIG_VLANS_PORT%02u_PRIO=%d" % (int(vlan_port_data["portNumber"]), int(vlan_port_data["vlanPortPrio"]))
+
+	if vlan_port_data["vlanPortVid"] != None:
+	    print >>config_fd, "CONFIG_VLANS_PORT%02u_VID=\"%s\"" % (int(vlan_port_data["portNumber"]), vlan_port_data["vlanPortVid"])
+	else:
+	    print >>config_fd, "CONFIG_VLANS_PORT%02u_VID=\"\"" % int(vlan_port_data["portNumber"])
+
+def fill_vlans_vlan(config_fd, json_data):
+    VLANs_range = range(0, 4095) # 0..4094
+    vlans_enable_set = {}
+
+    if json_data["configVlans"] == []:
+	for i in range(1, 4): # 1..3
+	    print >>config_fd, "# CONFIG_VLANS_ENABLE_SET%u is not set" % i
+	return
+    
+    for vlan_data in json_data["configVlans"]:
+	vlan_conf_string = ""
+	if vlan_data["vid"] == None:
+	    # this should never happen...
+	    print "Error: Vid not defined!"
+	    continue
+
+	if not (0 <= int(vlan_data["vid"]) <= 4094):
+	    # this should never happen...
+	    print "Error: Vid not in the range!"
+	    continue
+
+	if vlan_data["fid"] != None:
+	    vlan_conf_string += "fid=%s," % vlan_data["fid"]
+	if vlan_data["prio"] != None:
+	    vlan_conf_string += "prio=%s," % vlan_data["prio"]
+	if vlan_data["drop"] == "true":
+	    vlan_conf_string += "drop=y,"
+	if vlan_data["ports"] != None:
+	    vlan_conf_string += "ports=%s," % vlan_data["ports"]
+
+	# remove trailing comma if needed
+	vlan_conf_string = vlan_conf_string.rstrip(',')
+	print >>config_fd, "CONFIG_VLANS_VLAN%0004u=\"%s\"" % (int(vlan_data["vid"]), vlan_conf_string)
+
+	# remove current vid from the list
+	VLANs_range.remove(int(vlan_data["vid"]))
+
+	if (0 <= int(vlan_data["vid"]) <= 22):
+	    vlans_enable_set["1"] = "y"
+	if (22 < int(vlan_data["vid"]) <= 100):
+	    vlans_enable_set["2"] = "y"
+	if (100 < int(vlan_data["vid"]) <= 4094):
+	    vlans_enable_set["3"] = "y"
+
+    # add empty vid entries if needed
+    for i in VLANs_range:
+	print >>config_fd, "CONFIG_VLANS_VLAN%0004u=\"\"" % i
+
+    for i in range(1, 4): # 1..3
+	if vlans_enable_set.has_key(str(i)):
+	    print >>config_fd, "CONFIG_VLANS_ENABLE_SET%u=y" % i
+	else:
+	    print >>config_fd, "# CONFIG_VLANS_ENABLE_SET%u is not set" % i
 # -----------------------------------------------------------------------------
 
 inputfile = ''
@@ -362,6 +460,9 @@ for fiber_item in json_data["configFibers"]:
 # add empty fiber entries if needed
 for i in FIBER_DB_range:
     print >>config_fd, "CONFIG_FIBER%02u_PARAMS=\"\"" % (i)
+
+# VLANs
+fill_vlans(config_fd, json_data)
 
 # Add items from items_add
 for extra_item in items_add[fw_version]:
