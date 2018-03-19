@@ -30,7 +30,7 @@ cat > "$tmp_json"
 # "|| true" to avoid failing when json is missing item
 device_name_tmp=`cat "$tmp_json" | grep "switchName" || true`
 boot_server_tmp=`cat "$tmp_json" | grep "landbHcpNextServer" || true`
-commit_user_tmp=`cat "$tmp_json" | grep "requestedByUser"`
+commit_user_tmp=`cat "$tmp_json" | grep "requestedByUser" || true`
 
 if [ -n "$device_name_tmp" ]; then
     IFS=":, " read -r x device_name <<< $device_name_tmp
@@ -69,6 +69,7 @@ if [ -n "$commit_user_tmp" ]; then
 else
     author_surname="unknown"
     author_email="unknown@cern.ch"
+    commit_user="unknown"
 fi
 
 if [ $debug -ne 0 ]; then
