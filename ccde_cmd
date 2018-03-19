@@ -4,19 +4,34 @@
 #
 
 set -e
+
+debug=1
+test_mode=1
+if [ $debug -eq 0 ]; then
+    GIT_V="-q"
+fi
+
 #WRS_CONFIG_DIR="/nfs/cs-ccr-felab/sys/boot/white_rabbit"
-# for SCP
-WRS_CONFIG_DIR="cs-ccr-felab:/acc/sys/boot/white_rabbit"
+# for SSH
+WRS_CONFIG_DIR="/acc/sys/boot/white_rabbit"
 GEN_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# "REPO=wrs-configs-tests
+
+date=`date +%Y%m%d_%H%M%S`
 
 # add hostname into the tmpfile name
 tmp_path="/tmp"
+
 tmp_name=$(mktemp -u  $tmp_path/wrs.XXXXXX)
+repo_tmp=$(mktemp -u  $tmp_path/wrs-configs_tmp.XXXXXX)
 tmp_json="$tmp_name"-json
 cat > "$tmp_json"
 # "|| true" to avoid failing when json is missing item
 device_name_tmp=`cat "$tmp_json" | grep "switchName" || true`
 boot_server_tmp=`cat "$tmp_json" | grep "landbHcpNextServer" || true`
+commit_user_tmp=`cat "$tmp_json" | grep "requestedByUser"`
+
 if [ -n "$device_name_tmp" ]; then
     IFS=":, " read -r x device_name <<< $device_name_tmp
     # strip quotas
@@ -26,7 +41,7 @@ if [ -n "$device_name_tmp" ]; then
     tmp_json="$tmp_json_new"
 else
     echo "Device name (switchName) not found in the stdin"
-    rm "$tmp_json"
+    [ $test_mode -eq 1 ] || rm "$tmp_json"
     exit 1
 fi
 
@@ -41,13 +56,124 @@ else
     boot_server="cs-ccr-felab"
 fi
 
+if [ -n "$commit_user_tmp" ]; then
+    IFS=":, " read -r x commit_user <<< $commit_user_tmp
+    # strip quotas
+    commit_user=${commit_user//\"/}
+
+    phonebook_out=`/usr/bin/phonebook "$commit_user" -t surname -t firstname -t email`
+    ret=$?
+    if [ -n "$phonebook_out" ] && [ $ret -eq 0 ]; then
+        IFS=";" read -r author_surname author_firstname author_email <<< $phonebook_out
+    fi
+else
+    author_surname="unknown"
+    author_email="unknown@cern.ch"
+fi
+
+if [ $debug -ne 0 ]; then
+    echo "author_firstname=|$author_firstname|"
+    echo "author_surname=|$author_surname|"
+    echo "author_email=|$author_email|"
+fi
 tmp_config="$tmp_name"-dot-config
 # Uncomment to remove dot-config, even when this script fails
 # exec 3>"$tmp_json";rm "$tmp_json"
 "$GEN_DIR"/generate_config --json="$tmp_json" --config="$tmp_config"
-rm "$tmp_json"
-chmod g+w "$tmp_config"
-# use SCP since /nfs/cs-ccr-felab/sys/boot/white_rabbit is mounted ro on cs-ccr-apop3
-scp -p "$tmp_config" "$boot_server":/acc/sys/boot/white_rabbit/config-"$device_name"
-#mv -f "$tmp_config" "$WRS_CONFIG_DIR"/config-"$device_name"
-rm "$tmp_config"
+[ $test_mode -eq 1 ] ||  rm "$tmp_json"
+
+[ $debug -ne 0 ] && echo "tmp_config=$tmp_config"
+
+
+# repo_tmp=test
+
+# strip .cern.ch
+boot_server_hostname=${boot_server//.cern.ch/}
+[ $debug -ne 0 ] && echo "boot_server_hostname=$boot_server_hostname"
+
+repo_remote_name=wrs-configs-$boot_server_hostname
+[ $test_mode -eq 1 ] && repo_remote_name=wrs-configs-tests
+
+cur_pwd="$PWD"
+commit_file=config-"$device_name"
+
+# add a dot-config file to a local repo in steps:
+# 1. clone repo with configs
+# 2. add a dot-config to a repo (in a commit)
+# 3. push new commit
+# 4. fetch and checkout a new commit on machine with dot-configs
+
+echo "Update local dot-configs' database"
+push_retries=0
+while true;
+do
+    git clone $GIT_V ssh://git@gitlab.cern.ch:7999/white-rabbit/$repo_remote_name.git --single-branch --depth 1 $repo_tmp
+
+    cp "$tmp_config" $repo_tmp/"$commit_file"
+    cd $repo_tmp
+
+    # commit does not work for new files if where not staged before (even with explict pointing to a file)
+    git add "$commit_file"
+
+    git commit $GIT_V --author="$author_firstname $author_surname <$author_email>" -m "file=$commit_file, date=$date, user=$commit_user" --signoff -- "$commit_file"
+    ret=$?
+    if [ $ret -ne 0 ]; then
+        echo "Warning! Unable to create a commit! (return=$ret) Exiting!"
+        exit 1
+    fi
+
+    git push $GIT_V origin HEAD:master
+    ret=$?
+
+    cd "$cur_pwd"
+    [ $test_mode -eq 1 ] || rm -rf $repo_tmp
+
+    if [ $ret -ne 0 ]; then
+        echo "Warning! Unable to push to the repo (return=$ret)! Retry=$push_retries"
+    else
+        break
+    fi
+    if [ $push_retries -ge 5 ]; then
+        echo "Error when pushing to the repo! Max retries occured ($push_retries)! Exiting."
+        exit 1
+    fi
+    ((push_retries++))
+done
+
+repo_remote_path=$WRS_CONFIG_DIR
+[ $test_mode -eq 1 ] && repo_remote_path=/user/awujek/wrs-configs-tests
+[ $test_mode -eq 1 ] && boot_server=cs-ccr-dev1
+
+echo "Update remote dot-configs' database"
+#don't exit the main script if ssh commands fail
+set +e
+# use ssh since /nfs/cs-ccr-felab/sys/boot/white_rabbit is mounted ro on cs-ccr-apop3
+ssh -T  $boot_server /bin/bash <<-EOF
+cd $repo_remote_path
+not_master=\`git rev-list HEAD...origin/master --count\`
+if [ "\$not_master" != 0 ]; then
+    # warning
+    [ $debug -ne 0 ] && echo "not_master=|\$not_master|"
+    echo "Not in master branch! Switching to master!"
+fi
+
+#check if repo is dirty? (warning)
+
+git fetch $GIT_V
+# make sure we're in the master
+git checkout $GIT_V origin/master
+ret=\$?
+if [ "\$ret" -ne 0 ]; then
+    echo "Error when checking out master!"
+    exit 1
+fi
+EOF
+
+ret=$?
+
+echo Done
+
+[ $test_mode -eq 1 ] || rm "$tmp_config"
+[ $debug -ne 0 ] && echo xxxxxxxxxxxxxxxxxx END xxxxxxxxxxxxxxxxxx
+[ $debug -ne 0 ] && echo ret=$ret
+exit $ret
