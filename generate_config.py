@@ -370,9 +370,15 @@ else:
 print >>config_fd, "CONFIG_DOTCONF_FW_VERSION=\"%s\"" % json_data["CONFIG_DOTCONF_FW_VERSION"]
 
 # get the current time
-dotconf_info=time.strftime("%Y-%m-%d+%H:%M:%S")
+gen_time = time.strftime("%Y-%m-%d+%H:%M:%S")
+dotconf_info = "gen_time=%s;" % gen_time
+
+if "requestedByUser" in json_data:
+    gen_user = json_data["requestedByUser"]
+    dotconf_info+="gen_user=%s;" % gen_user
+
 print "dotconf_info: %s" % dotconf_info 
-print >>config_fd, "CONFIG_DOTCONF_INFO=\"gen_time=%s\"" % dotconf_info
+print >>config_fd, "CONFIG_DOTCONF_INFO=\"%s\"" % dotconf_info
 
 for config_item in json_data["configurationItems"]:
     if ((fw_version in items_skip) and (config_item["itemConfig"] in items_skip[fw_version])):
