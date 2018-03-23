@@ -85,7 +85,12 @@ tmp_config="$tmp_name"-dot-config
 
 [ $debug -ne 0 ] && echo "tmp_config=$tmp_config"
 
-
+# calculate md5sum, ignore CONFIG_DOTCONF_INFO
+md5sum_config=`cat "$tmp_config" | grep -v CONFIG_DOTCONF_INFO | md5sum - | cut -d " " -f 1`
+# used by CCDE
+echo "md5sum=$md5sum_config"
+# add md5sum=XXXX at the end of a CONFIG_DOTCONF_INFO string
+sed -i "s/CONFIG_DOTCONF_INFO=\(.*\)\"/CONFIG_DOTCONF_INFO=\1md5sum=$md5sum_config;\"/" "$tmp_config"
 # repo_tmp=test
 
 # strip .cern.ch
@@ -116,6 +121,7 @@ do
     # commit does not work for new files if where not staged before (even with explict pointing to a file)
     git add "$commit_file"
 
+    # make sure there is an user defined in the .gitconfig
     git commit $GIT_V --author="$author_firstname $author_surname <$author_email>" -m "file=$commit_file, date=$date, user=$commit_user" --signoff -- "$commit_file"
     ret=$?
     if [ $ret -ne 0 ]; then
