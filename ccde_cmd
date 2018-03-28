@@ -42,20 +42,21 @@ if [ -n "$device_name_tmp" ]; then
     mv -f "$tmp_json" "$tmp_json_new"
     tmp_json="$tmp_json_new"
 else
-    echo "Device name (switchName) not found in the stdin"
+    echo "Error: Device name (switchName) not found! Exit!"
     [ $test_mode -eq 1 ] || rm "$tmp_json"
     exit 1
 fi
 
-if [ -n "$boot_server_tmp" ] || [ "$boot_server_tmp" = "null" ]; then
+if [ -n "$boot_server_tmp" ] && ! [ "$boot_server_tmp" = "null" ]; then
     IFS=":, " read -r x boot_server <<< $boot_server_tmp
     # strip quotas
     boot_server=${boot_server//\"/}
     # lower case (For some reason ssh keys fails when hostname is capitalized)
     boot_server=${boot_server,,}
 else
-    echo "Boot server (landbHcpNextServer) not found in the stdin. Using default cs-ccr-felab."
-    boot_server="cs-ccr-felab"
+    echo "Error! Boot server (landbHcpNextServer) not found! Exit!"
+    [ $test_mode -eq 1 ] || rm "$tmp_json"
+    exit 1
 fi
 
 if [ -n "$commit_user_tmp" ]; then
