@@ -2,7 +2,9 @@
 
 # Adam Wujek CERN 2017
 #
-
+exec 2>&1
+exec > >(tee -i /tmp/wrs_ccde_cmd_log.txt)
+exec 2> >(tee -i /tmp/wrs_ccde_cmd_log_err.txt)
 set -e
 
 debug=1
@@ -114,6 +116,10 @@ push_retries=0
 while true;
 do
     git clone $GIT_V ssh://git@gitlab.cern.ch:7999/white-rabbit/$repo_remote_name.git --single-branch --depth 1 $repo_tmp
+    ret=$?
+    if [ $ret -ne 0 ]; then
+        echo "Warning! Unable to clone (return=$ret)"
+    fi
 
     cp "$tmp_config" $repo_tmp/"$commit_file"
     cd $repo_tmp
