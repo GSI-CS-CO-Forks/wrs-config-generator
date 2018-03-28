@@ -8,7 +8,7 @@ exec 2> >(tee -i /tmp/wrs_ccde_cmd_log_err.txt)
 set -e
 
 debug=1
-test_mode=1
+test_mode=0
 if [ $debug -eq 0 ]; then
     GIT_V="-q"
 fi
