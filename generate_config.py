@@ -423,26 +423,26 @@ for i in PORT_DB_range:
 # Add CONFIG_SFP00_PARAMS
 for sfp_item in json_data["configSfp"]:
     sfp_id = int(sfp_item["sfpId"])
+    sfp_entry = ""
     # check the range of sfps
     if not (0 <= sfp_id <= 9):
 	print "Error: Port " + sfp_item["sfpId"] + " out of range!"
 	continue
-
     # remove current sfp id from the list
     SFP_DB_range.remove(sfp_id)
-    print >>config_fd, "CONFIG_SFP%02u_PARAMS=\"vn=%s,pn=%s," % (
+    sfp_entry = "CONFIG_SFP%02u_PARAMS=\"vn=%s,pn=%s," % (
 	sfp_id,
 	sfp_item["vendorName"],
 	sfp_item["partNumber"],
-	),
+	)
     if (sfp_item["vendorSerial"] != None):
-	print >>config_fd, "vs=%s," % (sfp_item["vendorSerial"]),
-    print >>config_fd, "tx=%u,rx=%u,wl_txrx=%s\"" % (
+	sfp_entry += "vs=%s," % (sfp_item["vendorSerial"])
+    sfp_entry += "tx=%u,rx=%u,wl_txrx=%s\"" % (
 	int(sfp_item["dtx"]),
 	int(sfp_item["drx"]),
 	sfp_item["wavelength"]
 	)
-
+    print >>config_fd, sfp_entry
 # add empty sfp entries if needed
 for i in SFP_DB_range:
     print >>config_fd, "CONFIG_SFP%02u_PARAMS=\"\"" % (i)
