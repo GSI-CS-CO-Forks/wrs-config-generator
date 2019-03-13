@@ -448,7 +448,7 @@ for i in SFP_DB_range:
     print >>config_fd, "CONFIG_SFP%02u_PARAMS=\"\"" % (i)
 
 
-# Add CONFIG_SFP00_PARAMS
+# Add CONFIG_FIBER00_PARAMS
 for fiber_item in json_data["configFibers"]:
     fiber_id = int(fiber_item["fiberId"])
     # check the range of fibers
