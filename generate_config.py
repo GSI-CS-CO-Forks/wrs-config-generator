@@ -243,8 +243,9 @@ ccde_dev_name = ''
 file_json_in = ''
 config_use_defaults = 'yes'
 
-url_ccde = 'https://ccde.cern.ch:9094/api/'
-url_ccde_dev = 'https://ccde-dev.cern.ch:9094/api/'
+#url_ccde = 'https://ccde.cern.ch:9094/api/'
+url_ccde = 'https://ccde.cern.ch/api/'
+url_ccde_dev = 'https://ccde-dev.cern.ch/api/'
 
 try:
     opts, args = getopt.getopt(sys.argv[1:],"h",
