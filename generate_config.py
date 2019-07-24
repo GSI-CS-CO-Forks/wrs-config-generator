@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 
-# Adam Wujek CERN 2017
-#
+# Adam Wujek,      CERN, 2017
+# Jean-Claude Bau, CERN, 2019
 
 import json
 import requests
@@ -12,84 +12,7 @@ import subprocess
 import os
 import time
 
-# Supported FW versions
-fw_version_supported = [
-	"5.0",
-	"5.0.1",
-	"5.0-dev"
-	]
-
-# configuration items to skip
-items_skip = {
-	"5.0" : [
-		"CONFIG_SNMP_SWCORESTATUS_HP_FRAME_RATE",
-		"CONFIG_SNMP_SWCORESTATUS_RX_FRAME_RATE",
-		"CONFIG_SNMP_SWCORESTATUS_RX_PRIO_FRAME_RATE"
-		],
-	"5.0.1" : [
-		"CONFIG_SNMP_SWCORESTATUS_HP_FRAME_RATE",
-		"CONFIG_SNMP_SWCORESTATUS_RX_FRAME_RATE",
-		"CONFIG_SNMP_SWCORESTATUS_RX_PRIO_FRAME_RATE"
-		],
-	"5.0-dev" : [
-		"CONFIG_SNMP_SWCORESTATUS_HP_FRAME_RATE",
-		"CONFIG_SNMP_SWCORESTATUS_RX_FRAME_RATE",
-		"CONFIG_SNMP_SWCORESTATUS_RX_PRIO_FRAME_RATE"
-		]
-	}
-
-# configuration items to add
-items_add = {
-	"5.0" : [
-		"CONFIG_KEEP_ROOTFS=y",
-		'CONFIG_BR2_CONFIGFILE="wrs_release_br2_config"',
-		'CONFIG_ROOT_PWD_CLEAR=""'
-		],
-	"5.0.1" : [
-		"CONFIG_KEEP_ROOTFS=y",
-		'CONFIG_BR2_CONFIGFILE="wrs_release_br2_config"',
-		'CONFIG_ROOT_PWD_CLEAR=""'
-		],
-	"5.0-dev" : [
-		"CONFIG_KEEP_ROOTFS=y",
-		'CONFIG_BR2_CONFIGFILE="wrs_release_br2_config"',
-		'CONFIG_ROOT_PWD_CLEAR=""'
-		],
-	}
-
-# configuration items to convert from string to int
-items_conv_num = {
-	"5.0" : [
-		"CONFIG_SNMP_TEMP_THOLD_FPGA",
-		"CONFIG_SNMP_TEMP_THOLD_PLL",
-		"CONFIG_SNMP_TEMP_THOLD_PSL",
-		"CONFIG_SNMP_TEMP_THOLD_PSR",
-		"CONFIG_NIC_THROTTLING_VAL",
-		"CONFIG_FAN_HYSTERESIS_T_ENABLE",
-		"CONFIG_FAN_HYSTERESIS_T_DISABLE",
-		"CONFIG_FAN_HYSTERESIS_PWM_VAL"
-		],
-	"5.0.1" : [
-		"CONFIG_SNMP_TEMP_THOLD_FPGA",
-		"CONFIG_SNMP_TEMP_THOLD_PLL",
-		"CONFIG_SNMP_TEMP_THOLD_PSL",
-		"CONFIG_SNMP_TEMP_THOLD_PSR",
-		"CONFIG_NIC_THROTTLING_VAL",
-		"CONFIG_FAN_HYSTERESIS_T_ENABLE",
-		"CONFIG_FAN_HYSTERESIS_T_DISABLE",
-		"CONFIG_FAN_HYSTERESIS_PWM_VAL"
-		],
-	"5.0-dev" : [
-		"CONFIG_SNMP_TEMP_THOLD_FPGA",
-		"CONFIG_SNMP_TEMP_THOLD_PLL",
-		"CONFIG_SNMP_TEMP_THOLD_PSL",
-		"CONFIG_SNMP_TEMP_THOLD_PSR",
-		"CONFIG_NIC_THROTTLING_VAL",
-		"CONFIG_FAN_HYSTERESIS_T_ENABLE",
-		"CONFIG_FAN_HYSTERESIS_T_DISABLE",
-		"CONFIG_FAN_HYSTERESIS_PWM_VAL"
-		]
-	}
+import settings
 
 PORT_DB_range=range(1, 19) # 1..18
 SFP_DB_range=range(0, 10) # 0..9
@@ -363,7 +286,7 @@ print "HW version: %s" % json_data["CONFIG_DOTCONF_HW_VERSION"]
 print >>config_fd, "CONFIG_DOTCONF_HW_VERSION=\"%s\"" % json_data["CONFIG_DOTCONF_HW_VERSION"]
 
 fw_version=json_data["CONFIG_DOTCONF_FW_VERSION"]
-if fw_version in fw_version_supported:
+if settings.isFirmwareSupported(fw_version):
     print "FW version: %s" % fw_version
 else:
     print "FW version %s not supported! Exiting!" % fw_version
@@ -382,7 +305,7 @@ print "dotconf_info: %s" % dotconf_info
 print >>config_fd, "CONFIG_DOTCONF_INFO=\"%s\"" % dotconf_info
 
 for config_item in json_data["configurationItems"]:
-    if ((fw_version in items_skip) and (config_item["itemConfig"] in items_skip[fw_version])):
+    if settings.isItemToSkip(config_item["itemConfig"],fw_version):
 	# skip configuration item
 	continue
     elif config_item["itemValue"] == "true":
@@ -391,7 +314,7 @@ for config_item in json_data["configurationItems"]:
 	print >>config_fd, "# %s is not set" % config_item["itemConfig"]
     elif config_item["itemValue"] == None:
 	continue
-    elif ((fw_version in items_conv_num) and (config_item["itemConfig"] in items_conv_num[fw_version])):
+    elif settings.isNumericalItem(config_item["itemConfig"],fw_version):
 	print >>config_fd, "%s=%u" % (config_item["itemConfig"], int(config_item["itemValue"]))
     else:
 	print >>config_fd, "%s=\"%s\"" % (config_item["itemConfig"], config_item["itemValue"])
@@ -472,8 +395,10 @@ for i in FIBER_DB_range:
 fill_vlans(config_fd, json_data)
 
 # Add items from items_add
-for extra_item in items_add[fw_version]:
-    print >>config_fd, "%s" % (extra_item)
+keys=settings.listOfAddedItemsKeys(fw_version)
+
+for extra_item in keys:
+    print >>config_fd, "%s" % (settings.getAddedItemsKeyValue(extra_item))
 
 # close dot-config file
 config_fd.close()
