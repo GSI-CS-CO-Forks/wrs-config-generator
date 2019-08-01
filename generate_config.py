@@ -11,12 +11,11 @@ import getpass
 import subprocess
 import os
 import time
+import re
 
 import settings
+import ports
 
-PORT_DB_range=range(1, 19) # 1..18
-SFP_DB_range=range(0, 10) # 0..9
-FIBER_DB_range=range(0, 4) # 0..3
 # -----------------------------------------------------------------------------
 
 def print_help(prog_name):
@@ -51,107 +50,6 @@ def get_data_ccde(wrs_name, url, user, password):
 
 
 
-def fill_vlans(config_fd, json_data):
-    # enable VLANs
-    print >>config_fd, "CONFIG_VLANS_ENABLE=y"
-    fill_vlans_ports(config_fd, json_data)
-    fill_vlans_vlan(config_fd, json_data)
-
-
-
-def fill_vlans_ports(config_fd, json_data):
-    for vlan_port_data in json_data["configVlanPorts"]:
-	vlanPortMode = vlan_port_data["vlanPortMode"]
-
-	if vlanPortMode == "access":
-	    print >>config_fd, "CONFIG_VLANS_PORT%02u_MODE_ACCESS=y" % int(vlan_port_data["portNumber"])
-
-	    if vlan_port_data["vlanPortUntag"] == "true":
-		print >>config_fd, "CONFIG_VLANS_PORT%02u_UNTAG_ALL=y" % int(vlan_port_data["portNumber"])
-		print >>config_fd, "# CONFIG_VLANS_PORT%02u_UNTAG_NONE is not set" % int(vlan_port_data["portNumber"])
-	    else:
-		print >>config_fd, "CONFIG_VLANS_PORT%02u_UNTAG_NONE=y" % int(vlan_port_data["portNumber"])
-		print >>config_fd, "# CONFIG_VLANS_PORT%02u_UNTAG_ALL is not set" % int(vlan_port_data["portNumber"])
-	else:
-	     print >>config_fd, "# CONFIG_VLANS_PORT%02u_MODE_ACCESS is not set" % int(vlan_port_data["portNumber"])
-
-	if vlanPortMode == "trunk":
-	    print >>config_fd, "CONFIG_VLANS_PORT%02u_MODE_TRUNK=y" % int(vlan_port_data["portNumber"])
-	else:
-	     print >>config_fd, "# CONFIG_VLANS_PORT%02u_MODE_TRUNK is not set" % int(vlan_port_data["portNumber"])
-
-	if vlanPortMode == "unqualified":
-	    print >>config_fd, "CONFIG_VLANS_PORT%02u_MODE_UNQUALIFIED=y" % int(vlan_port_data["portNumber"])
-	else:
-	     print >>config_fd, "# CONFIG_VLANS_PORT%02u_MODE_UNQUALIFIED is not set" % int(vlan_port_data["portNumber"])
-
-	if vlanPortMode == "disabled":
-	    print >>config_fd, "CONFIG_VLANS_PORT%02u_MODE_DISABLED=y" % int(vlan_port_data["portNumber"])
-	else:
-	     print >>config_fd, "# CONFIG_VLANS_PORT%02u_MODE_DISABLED is not set" % int(vlan_port_data["portNumber"])
-
-
-	if vlan_port_data["vlanPortPrio"] != None:
-	    print >>config_fd, "CONFIG_VLANS_PORT%02u_PRIO=%d" % (int(vlan_port_data["portNumber"]), int(vlan_port_data["vlanPortPrio"]))
-
-	if vlan_port_data["vlanPortVid"] != None:
-	    print >>config_fd, "CONFIG_VLANS_PORT%02u_VID=\"%s\"" % (int(vlan_port_data["portNumber"]), vlan_port_data["vlanPortVid"])
-	else:
-	    print >>config_fd, "CONFIG_VLANS_PORT%02u_VID=\"\"" % int(vlan_port_data["portNumber"])
-
-def fill_vlans_vlan(config_fd, json_data):
-    VLANs_range = range(0, 4095) # 0..4094
-    vlans_enable_set = {}
-
-    if json_data["configVlans"] == []:
-	for i in range(1, 4): # 1..3
-	    print >>config_fd, "# CONFIG_VLANS_ENABLE_SET%u is not set" % i
-	return
-    
-    for vlan_data in json_data["configVlans"]:
-	vlan_conf_string = ""
-	if vlan_data["vid"] == None:
-	    # this should never happen...
-	    print "Error: Vid not defined!"
-	    continue
-
-	if not (0 <= int(vlan_data["vid"]) <= 4094):
-	    # this should never happen...
-	    print "Error: Vid not in the range!"
-	    continue
-
-	if vlan_data["fid"] != None:
-	    vlan_conf_string += "fid=%s," % vlan_data["fid"]
-	if vlan_data["prio"] != None:
-	    vlan_conf_string += "prio=%s," % vlan_data["prio"]
-	if vlan_data["drop"] == "true":
-	    vlan_conf_string += "drop=y,"
-	if vlan_data["ports"] != None:
-	    vlan_conf_string += "ports=%s," % vlan_data["ports"]
-
-	# remove trailing comma if needed
-	vlan_conf_string = vlan_conf_string.rstrip(',')
-	print >>config_fd, "CONFIG_VLANS_VLAN%0004u=\"%s\"" % (int(vlan_data["vid"]), vlan_conf_string)
-
-	# remove current vid from the list
-	VLANs_range.remove(int(vlan_data["vid"]))
-
-	if (0 <= int(vlan_data["vid"]) <= 22):
-	    vlans_enable_set["1"] = "y"
-	if (22 < int(vlan_data["vid"]) <= 100):
-	    vlans_enable_set["2"] = "y"
-	if (100 < int(vlan_data["vid"]) <= 4094):
-	    vlans_enable_set["3"] = "y"
-
-    # add empty vid entries if needed
-    for i in VLANs_range:
-	print >>config_fd, "CONFIG_VLANS_VLAN%0004u=\"\"" % i
-
-    for i in range(1, 4): # 1..3
-	if vlans_enable_set.has_key(str(i)):
-	    print >>config_fd, "CONFIG_VLANS_ENABLE_SET%u=y" % i
-	else:
-	    print >>config_fd, "# CONFIG_VLANS_ENABLE_SET%u is not set" % i
 # -----------------------------------------------------------------------------
 
 inputfile = ''
@@ -283,7 +181,6 @@ if not ("switchName" in json_data):
 
 print "Switch name %s" % json_data["switchName"]
 print "HW version: %s" % json_data["CONFIG_DOTCONF_HW_VERSION"]
-print >>config_fd, "CONFIG_DOTCONF_HW_VERSION=\"%s\"" % json_data["CONFIG_DOTCONF_HW_VERSION"]
 
 fw_version=json_data["CONFIG_DOTCONF_FW_VERSION"]
 if settings.isFirmwareSupported(fw_version):
@@ -291,117 +188,22 @@ if settings.isFirmwareSupported(fw_version):
 else:
     print "FW version %s not supported! Exiting!" % fw_version
     sys.exit(1)
-print >>config_fd, "CONFIG_DOTCONF_FW_VERSION=\"%s\"" % json_data["CONFIG_DOTCONF_FW_VERSION"]
 
-# get the current time
-gen_time = time.strftime("%Y-%m-%d+%H:%M:%S")
-dotconf_info = "gen_time=%s;" % gen_time
+encoder=settings.getEncoder(fw_version) 
+if encoder== None :
+    print "Cannot get encoder  for FW version %s ! Exiting!" % fw_version
+    sys.exit(1)
 
-if "requestedByUser" in json_data:
-    gen_user = json_data["requestedByUser"]
-    dotconf_info+="gen_user=%s;" % gen_user
+# Run the encoder
+lines=encoder.encode(json_data)
 
-print "dotconf_info: %s" % dotconf_info 
-print >>config_fd, "CONFIG_DOTCONF_INFO=\"%s\"" % dotconf_info
-
-for config_item in json_data["configurationItems"]:
-    if settings.isItemToSkip(config_item["itemConfig"],fw_version):
-	# skip configuration item
-	continue
-    elif config_item["itemValue"] == "true":
-	print >>config_fd, "%s=y" % config_item["itemConfig"]
-    elif config_item["itemValue"] == "false":
-	print >>config_fd, "# %s is not set" % config_item["itemConfig"]
-    elif config_item["itemValue"] == None:
-	continue
-    elif settings.isNumericalItem(config_item["itemConfig"],fw_version):
-	print >>config_fd, "%s=%u" % (config_item["itemConfig"], int(config_item["itemValue"]))
-    else:
-	print >>config_fd, "%s=\"%s\"" % (config_item["itemConfig"], config_item["itemValue"])
-
-# Add CONFIG_PORTXX_PARAMS
-for port_item in json_data["configPorts"]:
-    port_id = int(port_item["portNumber"])
-    # check the range of ports
-    if not (1 <= port_id <= 18):
-	print "Error: Port " + port_item["portNumber"] + " out of range!"
-	continue
-
-    # remove current port id from the list
-    PORT_DB_range.remove(port_id)
-    print >>config_fd, "CONFIG_PORT%02u_PARAMS=\"name=wri%u,proto=%s,tx=%u,rx=%u,role=%s,fiber=%s\""	% (
-	port_id,
-	port_id,
-	port_item["proto"],
-	int(port_item["dtx"]),
-	int(port_item["drx"]),
-	port_item["ptpRole"],
-	port_item["fiber"]
-	)
-
-# add empty port entries if needed
-for i in PORT_DB_range:
-    print >>config_fd, "CONFIG_PORT%02u_PARAMS=\"\"" % (i)
-
-
-# Add CONFIG_SFP00_PARAMS
-for sfp_item in json_data["configSfp"]:
-    sfp_id = int(sfp_item["sfpId"])
-    sfp_entry = ""
-    # check the range of sfps
-    if not (0 <= sfp_id <= 9):
-	print "Error: Port " + sfp_item["sfpId"] + " out of range!"
-	continue
-    # remove current sfp id from the list
-    SFP_DB_range.remove(sfp_id)
-    sfp_entry = "CONFIG_SFP%02u_PARAMS=\"vn=%s,pn=%s," % (
-	sfp_id,
-	sfp_item["vendorName"],
-	sfp_item["partNumber"],
-	)
-    if (sfp_item["vendorSerial"] != None):
-	sfp_entry += "vs=%s," % (sfp_item["vendorSerial"])
-    sfp_entry += "tx=%u,rx=%u,wl_txrx=%s\"" % (
-	int(sfp_item["dtx"]),
-	int(sfp_item["drx"]),
-	sfp_item["wavelength"]
-	)
-    print >>config_fd, sfp_entry
-# add empty sfp entries if needed
-for i in SFP_DB_range:
-    print >>config_fd, "CONFIG_SFP%02u_PARAMS=\"\"" % (i)
-
-
-# Add CONFIG_FIBER00_PARAMS
-for fiber_item in json_data["configFibers"]:
-    fiber_id = int(fiber_item["fiberId"])
-    # check the range of fibers
-    if not (0 <= fiber_id <= 3):
-	print "Error: Port " + fiber_item["fiberId"] + " out of range!"
-	continue
-    # remove current fiber id from the list
-    FIBER_DB_range.remove(fiber_id)
-    print >>config_fd, "CONFIG_FIBER%02u_PARAMS=\"alpha_%s=%s\"" % (
-	fiber_id,
-	fiber_item["waveLength"],
-	fiber_item["alpha"],
-	)
-
-# add empty fiber entries if needed
-for i in FIBER_DB_range:
-    print >>config_fd, "CONFIG_FIBER%02u_PARAMS=\"\"" % (i)
-
-# VLANs
-fill_vlans(config_fd, json_data)
-
-# Add items from items_add
-keys=settings.listOfAddedItemsKeys(fw_version)
-
-for extra_item in keys:
-    print >>config_fd, "%s" % (settings.getAddedItemsKeyValue(extra_item))
+# print lines into the dot-config file
+for line in lines:
+    print >>config_fd, line
 
 # close dot-config file
 config_fd.close()
+
 
 # the directory of the script being run
 script_dir = os.path.dirname(os.path.abspath(__file__))
