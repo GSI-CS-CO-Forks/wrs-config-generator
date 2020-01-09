@@ -7,7 +7,7 @@ import re
 import item
 from item import Item
 from encoder_5_0 import Encoder_5_0
-from encoder_5_1_0 import Encoder_5_1_0
+from encoder_6_0_0 import Encoder_6_0_0
 from __builtin__ import False
  
 
@@ -16,7 +16,7 @@ fw_version_supported = [
     "5.0",
     "5.0.1",
     "5.0-dev",
-    "5.1.0"
+    "6.0.0"
     ]
 
 
@@ -27,8 +27,8 @@ encoders = [
         "versions" : "5.0 5.0.1 5.0-dev"
         },
     {
-        "encoder"   : Encoder_5_1_0(),
-        "versions" : "5.1.0"
+        "encoder"   : Encoder_6_0_0(),
+        "versions" : "6.0.0"
         },
     ]
 

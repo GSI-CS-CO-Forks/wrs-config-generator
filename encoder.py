@@ -4,12 +4,12 @@
 
 
 #import settings
-from wrs_config import WrsConfig
 from item import Item
 import item
 import settings
 import re
 import sys
+import os
 
 class Encoder(object):
     _fwVersion=None
@@ -27,11 +27,13 @@ class Encoder(object):
         self._loadItems()
  
     def _loadItems(self):
-        fileName="./kconfigs/v%s/items.cfg" % (self._fwVersion)
+        # the directory of the script being run
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        fileName="%s/kconfigs/v%s/items.cfg" % (script_dir,self._fwVersion)
         try:
             f=open(fileName, "r")
         except IOError:
-            print 'Cannot open file', fileNameprint,". I/O error({0}): {1}".format(e.errno, e.strerror)
+            print("Cannot open file %s. I/O error %d: %s" % (fileNamee.errno, e.strerror))
             return False
         else:
             lines= f.readlines()

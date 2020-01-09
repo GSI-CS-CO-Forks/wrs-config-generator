@@ -7,15 +7,24 @@ from item import Item
 import item
 from encoder_5_0 import Encoder_5_0
 from __builtin__ import True
-from gtk import TRUE
 
-class Encoder_5_1_0(Encoder_5_0):
+class Encoder_6_0_0(Encoder_5_0):
     
     def __init__(self):
-       super(Encoder_5_1_0, self).__init__()
+       super(Encoder_6_0_0, self).__init__()
  
     def getGlobalConfig(self, gblConfig):
-        lines=super(Encoder_5_1_0, self).getGlobalConfig(gblConfig)
+        lines=super(Encoder_6_0_0, self).getGlobalConfig(gblConfig)
+        # Set Clock class
+        clockClass=248
+        if self.isItemNameDefined("CONFIG_TIME_GM") :
+            clockClass=6;
+        if self.isItemNameDefined("CONFIG_TIME_ARB_GM") :
+            clockClass=13;
+        elif self.isItemNameDefined("CONFIG_TIME_FR") :
+            clockClass=193;
+        lines.append(self.buildEntry(self.getItem("CONFIG_PTP_OPT_CLOCK_CLASS",str(clockClass))))
+            
         # SNMP_SYSTEM_CLOCK
         enabled=False
         if self.isItemNameDefined("CONFIG_NTP_SERVER") :
@@ -143,13 +152,13 @@ class Encoder_5_1_0(Encoder_5_0):
         return lines
     
     def getSfpsConfig(self, sfps):
-        lines=super(Encoder_5_1_0,self)._getSfpsConfig(sfps,18,False)
+        lines=super(Encoder_6_0_0,self)._getSfpsConfig(sfps,18,False)
         lines[:0] = [self.buildEntry(
                 self.getItem("CONFIG_N_SFP_ENTRIES",str(len(lines)),item.itemTypeInt))] 
         return lines
 
     def getFibersConfig(self, fibers):
-        lines=super(Encoder_5_1_0,self)._getFibersConfig(fibers,18,False)
+        lines=super(Encoder_6_0_0,self)._getFibersConfig(fibers,18,False)
         lines[:0] = [self.buildEntry(
                 self.getItem("CONFIG_N_FIBER_ENTRIES",str(len(lines)),item.itemTypeInt))] 
         return lines
