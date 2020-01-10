@@ -1,14 +1,10 @@
-#!/usr/bin/env python2.7
-
 # Jean-Claude Bau, CERN, 2019
 
 import re
-
 import item
 from item import Item
 from encoder_5_0 import Encoder_5_0
 from encoder_6_0_0 import Encoder_6_0_0
-from __builtin__ import False
  
 
 # Supported FW versions

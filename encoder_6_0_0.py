@@ -1,4 +1,3 @@
-#!/usr/bin/env python2.7
 
 # Jean-Claude Bau, CERN, 2019
 
@@ -6,7 +5,6 @@ import settings
 from item import Item
 import item
 from encoder_5_0 import Encoder_5_0
-from __builtin__ import True
 
 class Encoder_6_0_0(Encoder_5_0):
     
@@ -82,7 +80,7 @@ class Encoder_6_0_0(Encoder_5_0):
             ptpRole = port_item["ptpRole"]
             # check the range of ports
             if not (1 <= port_id <= 18):
-                print "Error: Port " + port_item["portNumber"] + " out of range!"
+                print ("Error: Port %s out of range!" % port_item["portNumber"]) 
                 continue
             
             # remove current port id from the list

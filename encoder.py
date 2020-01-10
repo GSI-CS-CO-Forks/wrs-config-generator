@@ -1,7 +1,4 @@
-#!/usr/bin/env python2.7
-
 # Jean-Claude Bau, CERN, 2019
-
 
 #import settings
 from item import Item
@@ -58,7 +55,7 @@ class Encoder(object):
             return None
         tokens=line.split()
         if len(tokens)<2 :
-            print "Invalid entry : ", line
+            print ("Invalid entry : %s" % line)
             return False
         # Read actions
         actStr=self.__removeQuotes(tokens[0])

@@ -1,5 +1,3 @@
-#!/usr/bin/env python2.7
-
 # Jean-Claude Bau, CERN, 2019
 
 import re
@@ -80,7 +78,7 @@ class Item():
             try :
                 line="%s=%u" % (self.__name, int(self.__value))
             except ValueError:
-                print "Cannot convert key %s to int value (\"%s\")\n"% (self.__name, self.__value)
+                print ("Cannot convert key %s to int value (\"%s\")\n" % (self.__name, self.__value))
         elif  self.__type == itemTypeBool :
             if self.__value == "y" :
                 line="%s=%s" % (self.__name, self.__value)

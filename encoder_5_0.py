@@ -1,11 +1,7 @@
-#!/usr/bin/env python2.7
-
 # Jean-Claude Bau, CERN, 2019
-
 
 #import settings
 from encoder import Encoder
-from wrs_config import WrsConfig
 from item import Item
 import item
 import settings
@@ -13,8 +9,7 @@ import re
 import sys
 import time
 
-class Encoder_5_0(Encoder):
-    WrsConfig 
+class Encoder_5_0(Encoder): 
     
     def __init__(self):
        super(Encoder_5_0, self).__init__()
@@ -50,7 +45,7 @@ class Encoder_5_0(Encoder):
         lines.append(self.buildEntry(self.getItem("CONFIG_DOTCONF_HW_VERSION",json_data["CONFIG_DOTCONF_HW_VERSION"])))
         lines.append(self.buildEntry(self.getItem("CONFIG_DOTCONF_FW_VERSION",self._fwVersion)))
         lines.append(self.buildEntry(self.getItem("CONFIG_DOTCONF_INFO",dotconf_info)))
-        print "dotconf_info: %s" % dotconf_info 
+        print ("dotconf_info: %s" % dotconf_info) 
         return lines
 
         
@@ -76,13 +71,13 @@ class Encoder_5_0(Encoder):
 
     def getPortsConfig(self, ports ):
         lines =[]
-        PORT_DB_range=range(1, 19) # 1..18
+        PORT_DB_range=list(range(1, 19)) # 1..18
            
         for port_item in ports:
             port_id = int(port_item["portNumber"])
             # check the range of ports
             if not (1 <= port_id <= 18):
-                print "Error: Port " + port_item["portNumber"] + " out of range!"
+                print ("Error: Port %s out of range!" % port_item["portNumber"])
                 continue
         
             # remove current port id from the list
@@ -111,7 +106,7 @@ class Encoder_5_0(Encoder):
         return lines
 
     def _getSfpsConfig(self, sfps, maxSfps,fillEmptySfps):
-        SFP_DB_range=range(0, maxSfps) # 0..9
+        SFP_DB_range=list(range(0, maxSfps)) # 0..9
         lines=[]
         # Add CONFIG_SFP00_PARAMS
         for sfp_item in sfps:
@@ -119,7 +114,7 @@ class Encoder_5_0(Encoder):
             sfp_entry = ""
             # check the range of sfps
             if not (0 <= sfp_id <= (maxSfps-1)):
-                print "Error: Port " + sfp_item["sfpId"] + " out of range!"
+                print("Error: Port %s out of range!" % sfp_item["sfpId"])
                 continue
             # remove current sfp id from the list
             SFP_DB_range.remove(sfp_id)
@@ -147,14 +142,14 @@ class Encoder_5_0(Encoder):
         return self._getSfpsConfig(sfps,10,True)
     
     def _getFibersConfig(self, fibers, maxFibers, fillEmptyFibers):
-        FIBER_DB_range=range(0, maxFibers) # 0..3
+        FIBER_DB_range=list(range(0, maxFibers)) # 0..3
         lines=[]
         # Add CONFIG_FIBER00_PARAMS
         for fiber_item in fibers:
             fiber_id = int(fiber_item["fiberId"])
             # check the range of fibers
             if not (0 <= fiber_id <= (maxFibers-1)):
-                print "Error: Port " + fiber_item["fiberId"] + " out of range!"
+                print ("Error: Fiber %s out of range" % fiber_item["fiberId"]) 
                 continue
             # remove current fiber id from the list
             FIBER_DB_range.remove(fiber_id)
@@ -184,7 +179,7 @@ class Encoder_5_0(Encoder):
 
 
     def _getVLansPorts(self, ports):
-        PORT_DB_range=range(1, 19) # 1..18
+        PORT_DB_range=list(range(1, 19)) # 1..18
         lines=[]
         for vlan_port_data in ports:
             portNumber=int(vlan_port_data["portNumber"])
@@ -232,7 +227,7 @@ class Encoder_5_0(Encoder):
     
     def _getVLansVlan(self,vlans) :
         lines=[]
-        VLANs_range = range(0, 4095) # 0..4094
+        VLANs_range = list(range(0, 4095)) # 0..4094
         vlans_enable_set = {}
         
         if vlans == []:
@@ -245,12 +240,12 @@ class Encoder_5_0(Encoder):
             vlan_conf_string = ""
             if vlan_data["vid"] == None:
                 # this should never happen...
-                print "Error: Vid not defined!"
+                print ("Error: Vid not defined!")
                 continue
             vid=int(vlan_data["vid"])
             if not (0 <=  vid <= 4094):
                 # this should never happen...
-                print "Error: Vid not in the range!"
+                print ("Error: Vid not in the range!")
                 continue
     
             if vlan_data["fid"] != None:
@@ -285,6 +280,6 @@ class Encoder_5_0(Encoder):
         for i in range(1, 4): # 1..3
             lines.append(self.buildEntry(
                      self.getItem("CONFIG_VLANS_ENABLE_SET%u" % (i),
-                    "y" if vlans_enable_set.has_key(str(i)) else "n")))
+                    "y" if str(i) in vlans_enable_set else "n")))
         return lines
     
