@@ -3,7 +3,7 @@ mainmenu "White Rabbit Switch  configuration"
 
 config DOTCONF_FW_VERSION
 	string "Firmware version"
-	default "6.0"
+	default "6.0.0"
 	help
 	  Free-text information about switch's firmware version. This field is
 	  for information purpose only. Additionally this field describes
@@ -11,6 +11,7 @@ config DOTCONF_FW_VERSION
 
 config DOTCONF_HW_VERSION
 	string "Hardware version"
+	default "3.4"
 	help
 	  Free-text information about switch's Hardware version. This field is
 	  for information purpose only.
@@ -223,6 +224,7 @@ config ROOT_ACCESS_DISABLE
 
 config LDAP_ENABLE
 	bool "Enable LDAP authorization"
+	default false
 	help
 	  Enable LDAP authorization. Used by ssh.
 
