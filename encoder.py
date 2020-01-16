@@ -66,10 +66,10 @@ class Encoder(object):
             actions=actions | item.itemActionSkip
         #Read key=value
         kv=self.__removeQuotes(tokens[1])
-        kvTokens=kv.split('=')
-        key=kvTokens[0]
-        if len(kvTokens)>1 :
-            value=self.__removeQuotes(kvTokens[1])
+        idx=kv.find('=')
+        key=kv[0:idx] if idx != -1 else kv
+        if idx !=-1 and ((idx+1)< len(kv)) :
+            value=self.__removeQuotes(kv[idx+1:])
         else :
             value="" # default value
         type=item.itemTypeString # default value
