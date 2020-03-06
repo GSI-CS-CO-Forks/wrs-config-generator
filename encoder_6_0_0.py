@@ -14,13 +14,17 @@ class Encoder_6_0_0(Encoder_5_0):
     def getGlobalConfig(self, gblConfig):
         lines=super(Encoder_6_0_0, self).getGlobalConfig(gblConfig)
         # Set Clock class
+        clockClassArr=(("CONFIG_TIME_BC",248),
+                       ("CONFIG_TIME_GM",6),
+                       ("CONFIG_TIME_FM",193),
+                       ("CONFIG_TIME_ARB_GM",13)
+                       )
         clockClass=248
-        if self.isItemNameDefined("CONFIG_TIME_GM") :
-            clockClass=6;
-        if self.isItemNameDefined("CONFIG_TIME_ARB_GM") :
-            clockClass=13;
-        elif self.isItemNameDefined("CONFIG_TIME_FR") :
-            clockClass=193;
+        for key, clk in clockClassArr :
+            if self.isItemNameDefined(key) :
+                if self.getItem(key).getValue()=="y" :
+                    clockClass=clk;
+                    break;
         lines.append(self.buildEntry(self.getItem("CONFIG_PTP_OPT_CLOCK_CLASS",str(clockClass))))
             
         # SNMP_SYSTEM_CLOCK
@@ -47,7 +51,7 @@ class Encoder_6_0_0(Encoder_5_0):
         # Are considered as master port :
         #    - master (obvious)
         #    - non-wr (WR extension + monitoring disabled)
-        #    - none   (PTP ) 
+        #    - none   (Empty port ) 
         # externalPortConfiguration is also possible only if it is a boundary clock
         isTimeBC=False
         if self.isItemNameDefined("CONFIG_TIME_BC") :
@@ -94,8 +98,15 @@ class Encoder_6_0_0(Encoder_5_0):
                 self.getItem("%s_FIBER" % (portCfgName), port_item["fiber"],item.itemTypeInt)))
             lines.append(self.buildEntry(
                 self.getItem("%s_CONSTANT_ASYMMETRY" % (portCfgName),"0")))
+            
+            if ptpRole=="none" :
+                lines.append(self.buildEntry(
+                    self.getItem("%s_INSTANCE_COUNT_0" % (portCfgName),"y")))
+                continue # Empty port 
+
             lines.append(self.buildEntry(
-                self.getItem("%s_INSTANCE_COUNT_1" % (portCfgName),"y")))
+                    self.getItem("%s_INSTANCE_COUNT_1" % (portCfgName),"y")))
+            
                         
             # Configure port instance (Only one for the moment)
             instCfgName="%s_INST01" % (portCfgName)
