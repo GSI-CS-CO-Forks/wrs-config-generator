@@ -14,13 +14,17 @@ class Encoder_6_0_0(Encoder_5_0):
     def getGlobalConfig(self, gblConfig):
         lines=super(Encoder_6_0_0, self).getGlobalConfig(gblConfig)
         # Set Clock class
+        clockClassArr=(("CONFIG_TIME_BC",248),
+                       ("CONFIG_TIME_GM",6),
+                       ("CONFIG_TIME_FM",193),
+                       ("CONFIG_TIME_ARB_GM",13)
+                       )
         clockClass=248
-        if self.isItemNameDefined("CONFIG_TIME_GM") :
-            clockClass=6;
-        if self.isItemNameDefined("CONFIG_TIME_ARB_GM") :
-            clockClass=13;
-        elif self.isItemNameDefined("CONFIG_TIME_FR") :
-            clockClass=193;
+        for key, clk in clockClassArr :
+            if self.isItemNameDefined(key) :
+                if self.getItem(key).getValue()=="y" :
+                    clockClass=clk;
+                    break;
         lines.append(self.buildEntry(self.getItem("CONFIG_PTP_OPT_CLOCK_CLASS",str(clockClass))))
             
         # SNMP_SYSTEM_CLOCK
