@@ -51,7 +51,7 @@ class Encoder_6_0_0(Encoder_5_0):
         # Are considered as master port :
         #    - master (obvious)
         #    - non-wr (WR extension + monitoring disabled)
-        #    - none   (PTP ) 
+        #    - none   (Empty port ) 
         # externalPortConfiguration is also possible only if it is a boundary clock
         isTimeBC=False
         if self.isItemNameDefined("CONFIG_TIME_BC") :
@@ -98,8 +98,15 @@ class Encoder_6_0_0(Encoder_5_0):
                 self.getItem("%s_FIBER" % (portCfgName), port_item["fiber"],item.itemTypeInt)))
             lines.append(self.buildEntry(
                 self.getItem("%s_CONSTANT_ASYMMETRY" % (portCfgName),"0")))
+            
+            if ptpRole=="none" :
+                lines.append(self.buildEntry(
+                    self.getItem("%s_INSTANCE_COUNT_0" % (portCfgName),"y")))
+                continue # Empty port 
+
             lines.append(self.buildEntry(
-                self.getItem("%s_INSTANCE_COUNT_1" % (portCfgName),"y")))
+                    self.getItem("%s_INSTANCE_COUNT_1" % (portCfgName),"y")))
+            
                         
             # Configure port instance (Only one for the moment)
             instCfgName="%s_INST01" % (portCfgName)
