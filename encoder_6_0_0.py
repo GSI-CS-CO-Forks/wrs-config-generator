@@ -171,3 +171,75 @@ class Encoder_6_0_0(Encoder_5_0):
         lines[:0] = [self.buildEntry(
                 self.getItem("CONFIG_N_FIBER_ENTRIES",str(len(lines)),item.itemTypeInt))] 
         return lines
+
+    def getVLansConfig(self, vlanPorts, vlans):
+        lines=[]
+        lines.append(self.buildEntry(self.getItem("CONFIG_VLANS_ENABLE","y")))
+        lines.append(self.buildEntry(self.getItem("CONFIG_VLANS_RAW_PORT_CONFIG","y")))
+        lines+=self._getVLansPorts(vlanPorts)
+        lines+=self._getVLansVlan(vlans)
+        return lines
+ 
+    def _getVLansPorts(self, ports):
+        PORT_DB_range=list(range(1, 19)) # 1..18
+        lines=[]
+        for vlan_port_data in ports:
+            portNumber=int(vlan_port_data["portNumber"])
+            vlanPortMode = vlan_port_data["vlanPortMode"]
+            vlanPortVid = vlan_port_data["vlanPortVid"] 
+            vlanPortPrio=vlan_port_data["vlanPortPrio"]
+            vlanPortUntagged=vlan_port_data["vlanPortUntag"]
+            try:
+                vlanPortPtpVid=vlan_port_data["vlanPortPtpVid"]
+            except :
+                vlanPortPtpVid=None
+            try:
+                vlanPortPtpVidEnabled=vlan_port_data["vlanPortPtpVidEnabled"]
+            except :
+                vlanPortPtpVidEnabled=None
+            prefix="CONFIG_VLANS_PORT%02u" % (portNumber)
+            
+            PORT_DB_range.remove(portNumber)
+
+            lines.append(self.buildEntry(
+                    self.getItem(prefix+"_MODE_ACCESS","y" if vlanPortMode == "access" else "n")))
+            lines.append(self.buildEntry(
+                    self.getItem(prefix+"_MODE_TRUNK","y" if vlanPortMode == "trunk" else "n")))
+            lines.append(self.buildEntry(
+                    self.getItem(prefix+"_MODE_UNQUALIFIED","y" if vlanPortMode == "unqualified" else "n")))
+            lines.append(self.buildEntry(
+                self.getItem(prefix+"_MODE_DISABLED","y" if vlanPortMode == "disabled" else "n")))
+        
+            lines.append(self.buildEntry(self.getItem(prefix+"_UNTAG_ALL","y" if vlanPortUntagged else "n")))
+            lines.append(self.buildEntry(self.getItem(prefix+"_UNTAG_NONE","n" if vlanPortUntagged else "y")))
+            
+            lines.append(
+                    self.buildEntry(self.getItem(prefix+"_PRIO" , vlanPortPrio if vlanPortPrio!=None else "-1" ,item.itemTypeInt)))
+        
+            lines.append(self.buildEntry(
+                    self.getItem(prefix+"_VID", vlanPortVid if vlanPortVid!=None else "",item.itemTypeString)))
+            
+            # Evaluate PTP VID
+            if vlanPortPtpVid==None or vlanPortPtpVidEnabled==None :
+                # Does not exists yet in CCDE
+                if vlanPortMode=="trunk" or vlanPortMode=="access" :
+                    vlanPortPtpVid=vlanPortVid
+                else :
+                    vlanPortPtpVid=""
+            elif vlanPortPtpVidEnabled=="n":
+                 vlanPortPtpVid=vlanPortVid
+                 
+            lines.append(self.buildEntry(
+                    self.getItem(prefix+"_PTP_VID", vlanPortPtpVid if vlanPortPtpVid!=None else "",item.itemTypeString)))
+                 
+        # add empty port entries if needed
+        for i in PORT_DB_range:
+            prefix="CONFIG_VLANS_PORT%02u" % (i)
+            lines.append(self.buildEntry(self.getItem(prefix+"_MODE_ACCESS","n")))
+            lines.append(self.buildEntry(self.getItem(prefix+"_MODE_TRUNK","n")))
+            lines.append(self.buildEntry(self.getItem(prefix+"_MODE_DISABLED","n")))
+            lines.append(self.buildEntry(self.getItem(prefix+"_MODE_UNQUALIFIED","y")))
+            lines.append(self.buildEntry(self.getItem(prefix+"_PRIO","-1",item.itemTypeInt)))
+            lines.append(self.buildEntry(self.getItem(prefix+"_VID","")))
+        
+        return lines

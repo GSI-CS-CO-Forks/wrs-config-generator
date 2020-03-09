@@ -150,7 +150,7 @@ if (file_json_in != ''):
         try:
             json_data = json.load(data_file)
         except ValueError:
-            print ("Error: Syntax error in file: %s" + file_json_in)
+            print ("Error: Syntax error in file: " + file_json_in)
             sys.exit(1)
     data_file.close()
 
