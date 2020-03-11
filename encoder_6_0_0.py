@@ -210,25 +210,29 @@ class Encoder_6_0_0(Encoder_5_0):
             lines.append(self.buildEntry(
                 self.getItem(prefix+"_MODE_DISABLED","y" if vlanPortMode == "disabled" else "n")))
         
-            lines.append(self.buildEntry(self.getItem(prefix+"_UNTAG_ALL","y" if vlanPortUntagged else "n")))
-            lines.append(self.buildEntry(self.getItem(prefix+"_UNTAG_NONE","n" if vlanPortUntagged else "y")))
+            if vlanPortUntagged=="true" :
+                lines.append(self.buildEntry(self.getItem(prefix+"_UNTAG_ALL","y")));
+                lines.append(self.buildEntry(self.getItem(prefix+"_UNTAG_NONE","n")));
+            else : 
+                lines.append(self.buildEntry(self.getItem(prefix+"_UNTAG_ALL","n")));
+                lines.append(self.buildEntry(self.getItem(prefix+"_UNTAG_NONE","y")));
             
             lines.append(
                     self.buildEntry(self.getItem(prefix+"_PRIO" , vlanPortPrio if vlanPortPrio!=None else "-1" ,item.itemTypeInt)))
         
-            lines.append(self.buildEntry(
-                    self.getItem(prefix+"_VID", vlanPortVid if vlanPortVid!=None else "",item.itemTypeString)))
-            
             # Evaluate PTP VID
             if vlanPortPtpVid==None or vlanPortPtpVidEnabled==None :
                 # Does not exists yet in CCDE
-                if vlanPortMode=="trunk" or vlanPortMode=="access" :
-                    vlanPortPtpVid=vlanPortVid
-                else :
-                    vlanPortPtpVid=""
+                vlanPortPtpVid=vlanPortVid
+                if vlanPortMode=="trunk" or vlanPortMode=="unqualified" or vlanPortMode=="disabled":
+                    vlanPortVid="" # in this case VID is used to set only PTP_VID
             elif vlanPortPtpVidEnabled=="n":
+                #PTP VID exists in CCDE but we use the default behavior 
                  vlanPortPtpVid=vlanPortVid
                  
+            lines.append(self.buildEntry(
+                    self.getItem(prefix+"_VID", vlanPortVid if vlanPortVid!=None else "",item.itemTypeString)))
+            
             lines.append(self.buildEntry(
                     self.getItem(prefix+"_PTP_VID", vlanPortPtpVid if vlanPortPtpVid!=None else "",item.itemTypeString)))
                  
