@@ -223,8 +223,11 @@ class Encoder_6_0_0(Encoder_5_0):
             # Evaluate PTP VID
             if vlanPortPtpVid==None or vlanPortPtpVidEnabled==None :
                 # Does not exists yet in CCDE
-                vlanPortPtpVid=vlanPortVid
-                if vlanPortMode=="trunk" or vlanPortMode=="unqualified" or vlanPortMode=="disabled":
+                if vlanPortMode=="unqualified" or vlanPortMode=="disabled":
+                    vlanPortPtpVid=""
+                else :
+                    vlanPortPtpVid=vlanPortVid
+                if vlanPortMode=="trunk" or vlanPortMode=="disabled":
                     vlanPortVid="" # in this case VID is used to set only PTP_VID
             elif vlanPortPtpVidEnabled=="n":
                 #PTP VID exists in CCDE but we use the default behavior 
