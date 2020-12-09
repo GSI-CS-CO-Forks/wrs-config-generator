@@ -168,12 +168,47 @@ class Encoder_6_0_0(Encoder_5_0):
                 self.getItem("CONFIG_N_FIBER_ENTRIES",str(len(lines)),item.itemTypeInt))] 
         return lines
 
-    def getVLansConfig(self, vlanPorts, vlans):
+    def getVLansConfig(self, vlanPorts, vlans, rvlan):
         lines=[]
         lines.append(self.buildEntry(self.getItem("CONFIG_VLANS_ENABLE","y")))
         lines.append(self.buildEntry(self.getItem("CONFIG_VLANS_RAW_PORT_CONFIG","y")))
+        lines+=self._getVLansRadius(rvlan)
         lines+=self._getVLansPorts(vlanPorts)
         lines+=self._getVLansVlan(vlans)
+        return lines
+
+    def _getVLansRadius(self, rvlan):
+        lines=[]
+
+        value="n"
+        if self.isItemNameDefined("CONFIG_VLANS_ENABLE"):
+          anItem = self.getItem("CONFIG_VLANS_ENABLE")
+          value = anItem.getValue()
+
+        if value == "n":  # if VLANS is disabled, then disable also RVLAN and return
+          lines.append(self.buildEntry(self.getItem("CONFIG_RVLAN_ENABLE", value)))
+          return lines
+
+        lines.append(self.buildEntry(self.getItem("CONFIG_RVLAN_ENABLE", "n" if rvlan["enable"] == "" else rvlan["enable"])))
+
+        value=4094 # highest VLAN ID
+        lines.append(self.buildEntry(self.getItem("CONFIG_RVLAN_AUTH_VLAN", str(value) if rvlan["defVlan"] > value else str(rvlan["defVlan"]))))
+        lines.append(self.buildEntry(self.getItem("CONFIG_RVLAN_NOAUTH_VLAN", str(value) if rvlan["unauthVlan"] > value else str(rvlan["unauthVlan"]))))
+
+        lines.append(self.buildEntry(self.getItem("CONFIG_RVLAN_RADIUS_SERVERS", rvlan["servers"])))
+        lines.append(self.buildEntry(self.getItem("CONFIG_RVLAN_RADIUS_SECRET", rvlan["secret"])))
+        lines.append(self.buildEntry(self.getItem("CONFIG_RVLAN_OBEY_DOTCONFIG", "n" if rvlan["obey"] is None else rvlan["obey"])))
+
+        value=0xffffffff # all (access) wri ports are monitored
+        if rvlan["unauthPorts"] != "":
+          unauthPorts=rvlan["unauthPorts"].split(',')
+          for p in unauthPorts:
+            portIdx = int(p)
+            if 0 < portIdx and portIdx <= 18:
+              portMask = 1 << (portIdx - 1)
+              value = value & ~portMask  # mask port-bit
+        lines.append(self.buildEntry(self.getItem("CONFIG_RVLAN_PMASK", format(value, 'x'))))
+
         return lines
  
     def _getVLansPorts(self, ports):

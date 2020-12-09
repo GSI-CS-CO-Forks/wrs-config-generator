@@ -29,7 +29,7 @@ class Encoder_5_0(Encoder):
         # Add items declare in the items.cfg file
         lines+=self.getExtraItemsConfig()
        #  Add VLan config
-        lines+=self.getVLansConfig(json_data["configVlanPorts"],json_data["configVlans"])
+        lines+=self.getVLansConfig(json_data["configVlanPorts"],json_data["configVlans"],json_data["configRvlan"])
         return lines
 
     def getHeaderConfig(self, json_data):
@@ -170,7 +170,7 @@ class Encoder_5_0(Encoder):
         return  self._getFibersConfig(fibers,4, True)
     
 
-    def getVLansConfig(self, vlanPorts, vlans):
+    def getVLansConfig(self, vlanPorts, vlans, rvlan):
         lines=[]
         lines.append(self.buildEntry(self.getItem("CONFIG_VLANS_ENABLE","y")))
         lines+=self._getVLansPorts(vlanPorts)
