@@ -14,7 +14,7 @@ config VLANS_RAW_PORT_CONFIG
 	help
 	  Enable raw configuration for VLANS
 
-menu "Radius-vlan options"
+menu "RADIUS VLAN options"
 config RVLAN_ENABLE
 	bool "Run the 'radius-vlan' authorization daemon"
 	help
