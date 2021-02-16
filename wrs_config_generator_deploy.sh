@@ -14,10 +14,10 @@ if [ "$dev" == "1" ] ; then
 fi
 DEPLOY_PATH="${TOOLS_PATH}/wrs_config_generator_releases"
 GIT_PROJECT="wrs-config-generator"
-GIT_URL=ssh://git@gitlab.cern.ch:7999/white-rabbit/${GIT_PROJECT}.git
+GIT_URL=https://gitlab.cern.ch/white-rabbit/${GIT_PROJECT}.git
 
 #Get list of tags 
-tags=`git ls-remote --tags ssh://git@gitlab.cern.ch:7999/white-rabbit/wrs-config-generator.git |  grep -v "\^{}" |grep -o 'refs/tags/w[0-9]*\.[0-9]*\.[0-9]*.*' | sort -r | head | grep -o '[^\/]*$' | tr '\n' ' '`
+tags=`git ls-remote --tags https://gitlab.cern.ch/white-rabbit/wrs-config-generator.git |  grep -v "\^{}" |grep -o 'refs/tags/w[0-9]*\.[0-9]*\.[0-9]*.*' | sort -r | head | grep -o '[^\/]*$' | tr '\n' ' '`
 if [ "$?" != "0" ] ; then
 	printf "Cannot get list of tags !!! Exit.\n" 
 	exit 1
