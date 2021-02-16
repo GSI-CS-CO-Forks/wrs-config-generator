@@ -135,6 +135,8 @@ class Encoder_6_0_0(Encoder_5_0):
             lines.append(self.buildEntry(
                 self.getItem("%s_INGRESS_LATENCY" % (instCfgName),port_item["drx"],item.itemTypeInt)))
             lines.append(self.buildEntry(
+                self.getItem("%s_T24P_TRANS_POINT" % (instCfgName),port_item["t24p"],item.itemTypeInt)))
+            lines.append(self.buildEntry(
                     self.getItem("%s_ASYMMETRY_CORRECTION_ENABLE" % (instCfgName),"y")))
             lines.append(self.buildEntry(
                 self.getItem("%s_MECHANISM_E2E" % (instCfgName),"y")))
