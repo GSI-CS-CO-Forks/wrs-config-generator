@@ -125,7 +125,7 @@ clone() {
 	if [ -d ${dirLocation} ] ; then
 		printf "Error: ${dirLocation} directory already exists."
 	else
-		git clone -b master ${GIT_URL} ${dirLocation}	
+		git clone -b $tagToClone ${GIT_URL} ${dirLocation}	
 		if [ "$?" != "0" ] ; then
 			printf "Error: Cannot clone tag ${tagToClone} !!!\n"
 		else 
