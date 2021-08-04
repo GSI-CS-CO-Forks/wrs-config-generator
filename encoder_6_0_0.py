@@ -220,6 +220,8 @@ class Encoder_6_0_0(Encoder_5_0):
             vlanPortVid = vlan_port_data["vlanPortVid"] 
             vlanPortPrio=vlan_port_data["vlanPortPrio"]
             vlanPortUntagged=vlan_port_data["vlanPortUntag"]
+            vlanPortLldpTxVid=vlan_port_data["vlanPortLldpTxVid"]
+            vlanPortLldpTxPrio=vlan_port_data["vlanPortLldpTxPrio"]
             try:
                 vlanPortPtpVid=vlan_port_data["vlanPortPtpVid"]
             except :
@@ -269,6 +271,13 @@ class Encoder_6_0_0(Encoder_5_0):
             
             lines.append(self.buildEntry(
                     self.getItem(prefix+"_PTP_VID", vlanPortPtpVid if vlanPortPtpVid!=None else "",item.itemTypeString)))
+
+            # Evaluate LLDP TX settings
+            lines.append(self.buildEntry(
+                    self.getItem(prefix+"_LLDP_TX_VID", vlanPortLldpTxVid if vlanPortLldpTxVid!=None else "",item.itemTypeString)))
+
+            lines.append(self.buildEntry(
+                    self.getItem(prefix+"_LLDP_TX_PRIO", vlanPortLldpTxPrio if vlanPortLldpTxPrio!=None else "0",item.itemTypeInt)))
                  
         # add empty port entries if needed
         for i in PORT_DB_range:
@@ -279,5 +288,7 @@ class Encoder_6_0_0(Encoder_5_0):
             lines.append(self.buildEntry(self.getItem(prefix+"_MODE_UNQUALIFIED","y")))
             lines.append(self.buildEntry(self.getItem(prefix+"_PRIO","-1",item.itemTypeInt)))
             lines.append(self.buildEntry(self.getItem(prefix+"_VID","")))
+            lines.append(self.buildEntry(self.getItem(prefix+"_LLDP_TX_VID","")))
+            lines.append(self.buildEntry(self.getItem(prefix+"_LLDP_TX_PRIO","0",item.itemTypeInt)))
         
         return lines
