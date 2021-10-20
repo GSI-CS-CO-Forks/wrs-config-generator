@@ -33,12 +33,12 @@ class Encoder_6_0_0(Encoder_5_0):
             enabled=self.getItem("CONFIG_SNMP_SYSTEM_CLOCK_MONITOR_ENABLED").getValue()
 
         if enabled :
-            # Set drift to 3 seconds and check every 1 hour
-            lines.append(self.buildEntry(self.getItem("CONFIG_SNMP_SYSTEM_CLOCK_DRIFT_THOLD","3")))
-            lines.append(self.buildEntry(self.getItem("CONFIG_SNMP_SYSTEM_CLOCK_UNIT_HOURS","y")))
+            # Set drift to 1 second and check every half hour
+            lines.append(self.buildEntry(self.getItem("CONFIG_SNMP_SYSTEM_CLOCK_DRIFT_THOLD","1")))
+            lines.append(self.buildEntry(self.getItem("CONFIG_SNMP_SYSTEM_CLOCK_UNIT_HOURS","n")))
             lines.append(self.buildEntry(self.getItem("CONFIG_SNMP_SYSTEM_CLOCK_UNIT_DAYS","n")))
-            lines.append(self.buildEntry(self.getItem("CONFIG_SNMP_SYSTEM_CLOCK_UNIT_MINUTES","n")))
-            lines.append(self.buildEntry(self.getItem("CONFIG_SNMP_SYSTEM_CLOCK_CHECK_INTERVAL_HOURS","1")))
+            lines.append(self.buildEntry(self.getItem("CONFIG_SNMP_SYSTEM_CLOCK_UNIT_MINUTES","y")))
+            lines.append(self.buildEntry(self.getItem("CONFIG_SNMP_SYSTEM_CLOCK_CHECK_INTERVAL_MINUTES","30")))
         return lines
  
     # Add port configuration for version 5.1.0 to ...
