@@ -222,7 +222,6 @@ if pythonVersion == 3 :
     process = subprocess.Popen(verify_dot_config_command.split(),
     			   stdout=subprocess.PIPE,
     			   stderr=subprocess.PIPE,
-                   text=True,
     			   cwd=kconfig_path,
     			   env=verify_dot_config_env)
 else :
@@ -249,7 +248,6 @@ if (config_use_defaults == "yes"):
         process = subprocess.Popen(verify_dot_config_command.split(),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
-                                text=True,
                    			    cwd=kconfig_path,
                                 env=verify_dot_config_env)
     else :
