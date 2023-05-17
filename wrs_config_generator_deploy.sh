@@ -14,10 +14,10 @@ if [ "$dev" == "1" ] ; then
 fi
 DEPLOY_PATH="${TOOLS_PATH}/wrs_config_generator_releases"
 GIT_PROJECT="wrs-config-generator"
-GIT_URL=ssh://git@gitlab.cern.ch:7999/white-rabbit/${GIT_PROJECT}.git
+GIT_URL=https://gitlab.cern.ch/white-rabbit/${GIT_PROJECT}.git
 
 #Get list of tags 
-tags=`git ls-remote --tags ssh://git@gitlab.cern.ch:7999/white-rabbit/wrs-config-generator.git |  grep -v "\^{}" |grep -o 'refs/tags/w[0-9]*\.[0-9]*\.[0-9]*.*' | sort -r | head | grep -o '[^\/]*$' | tr '\n' ' '`
+tags=`git ls-remote --tags https://gitlab.cern.ch/white-rabbit/wrs-config-generator.git |  grep -v "\^{}" |grep -o 'refs/tags/w[0-9]*\.[0-9]*\.[0-9]*.*' | sort -r | head | grep -o '[^\/]*$' | tr '\n' ' '`
 if [ "$?" != "0" ] ; then
 	printf "Cannot get list of tags !!! Exit.\n" 
 	exit 1
@@ -88,6 +88,35 @@ menu_deploy() {
     done
 } 
 
+menu_dev() {
+	while : ; do
+		menu_header
+	    printf "Set development version menu\n\n"
+	    local lct=$(list_cloned_tags)
+		IFS=' ' read -ra idep <<< "$lct"
+		if [ -n "$lct" ] ; then
+			for i in "${!idep[@]}"; do
+			    printf "  %s) %s\n" "$i" "${idep[$i]}"
+			done
+		fi
+		printf "  q) quit\n\n"
+	    printf "\n  Choice: "
+		IFS= read -r opt
+		if [ "$opt" == "q" ] ; then
+			break;
+		fi
+		if [[ $opt =~ ^[0-9]+$ ]] && (( ($opt >= 0) && ($opt <= "${#idep[@]}") ));  then
+    		rm -f ${TOOLS_PATH}/${GIT_PROJECT}_dev
+    		ln -s ${DEPLOY_PATH}/${idep[$opt]} ${TOOLS_PATH}/${GIT_PROJECT}_dev
+    		break
+		else
+		echo
+    		if [ "$opt" == "q" ] ; then
+    			return 0
+    		fi
+    	fi
+    done
+}
 
 clone() {
 	local tagToClone=$1
@@ -96,7 +125,7 @@ clone() {
 	if [ -d ${dirLocation} ] ; then
 		printf "Error: ${dirLocation} directory already exists."
 	else
-		git clone -b master ${GIT_URL} ${dirLocation}	
+		git clone -b $tagToClone ${GIT_URL} ${dirLocation}	
 		if [ "$?" != "0" ] ; then
 			printf "Error: Cannot clone tag ${tagToClone} !!!\n"
 		else 
@@ -132,13 +161,15 @@ menu_main() {
 	    menu_header
 	    printf "Main menu\n\n"
 		printf "  0) Clone new tagged version\n"
-		printf "  1) Set production version\n"
+		printf "  1) Set production  version (used by CCDE)\n"
+		printf "  2) Set development version (used by CCDE_DEV) \n"
 		printf "  q) Quit\n\n"
 		printf "  Choice :"
 		IFS= read -r opt
 		case "$opt" in
 			"0") menu_clone ;;
 			"1") menu_deploy;;
+			"2") menu_dev;;
 			"q") break ;;
 		esac
     done	

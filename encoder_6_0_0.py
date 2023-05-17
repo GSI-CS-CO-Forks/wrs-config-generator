@@ -292,5 +292,8 @@ class Encoder_6_0_0(Encoder_5_0):
             lines.append(self.buildEntry(self.getItem(prefix+"_VID","")))
             lines.append(self.buildEntry(self.getItem(prefix+"_LLDP_TX_VID","")))
             lines.append(self.buildEntry(self.getItem(prefix+"_LLDP_TX_PRIO","0",item.itemTypeInt)))
-        
+            lines.append(self.buildEntry(self.getItem(prefix+"_UNTAG_ALL","n")));
+            lines.append(self.buildEntry(self.getItem(prefix+"_UNTAG_NONE","y")));
+            lines.append(self.buildEntry(self.getItem(prefix+"_PTP_VID", "")));
+
         return lines
