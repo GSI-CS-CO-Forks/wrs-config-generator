@@ -1,21 +1,20 @@
 menu "Port Timing Configuration"
 config PTP_OPT_EXT_PORT_CONFIG_ENABLED
-	bool "externalPortConfigurationEnabled" 
-	depends on TIME_BC
+	bool "externalPortConfigurationEnabled"
 	default false
 	help
 	  This option is used by the high accuracy profile to force the port state.
 	  When set, BMCA is disabled.
-	  For more details please refer to the IEEE 1588-20019 (clause 17.6.2)
+	  For more details please refer to the IEEE 1588-2019 (clause 17.6.2)
 
 config PTP_SLAVE_ONLY
-	depends on PTP_OPT_EXT_PORT_CONFIG_ENABLED="n" 
-	bool "slaveOnly" 
+	depends on PTP_OPT_EXT_PORT_CONFIG_ENABLED="n"
+	bool "slaveOnly"
 	default n
 	help
 	  A slaveOnly Ordinary Clock utilizes the slaveOnly state machine
 	  which does not enable transition to MASTER state.
-	  For more details please refer to the IEEE 1588-20019 (clause 9.2.2.1)
+	  For more details please refer to the IEEE 1588-2019 (clause 9.2.2.1)
 
 menu "PORT 1"
 
@@ -129,12 +128,11 @@ config PORT01_INST01_INGRESS_LATENCY
 
 config PORT01_INST01_T24P_TRANS_POINT
     int "timestampCorrectionPortDS.t24p_trans_point (ps)"
-    default 13600
  help
 	 Defines the phase transition point for reception timestamps t2/t4 (ps)
 
 config PORT01_INST01_ANNOUNCE_INTERVAL
-	int "logAnnounceInterval" 
+	int "logAnnounceInterval"
 	default 1
 	range 0 4
 	help
@@ -186,6 +184,11 @@ config PORT01_INST01_MIN_PDELAY_REQ_INTERVAL
 	  The configurable range shall be 0 to 5
 
 endmenu
+
+# Keep T24P_TRANS_POINT also for ports without instances
+config PORT01_INST01_T24P_TRANS_POINT
+    int
+    default 13600
 
 endmenu
 
@@ -300,12 +303,11 @@ config PORT02_INST01_INGRESS_LATENCY
 
 config PORT02_INST01_T24P_TRANS_POINT
     int "timestampCorrectionPortDS.t24p_trans_point (ps)"
-    default 10800
  help
 	 Defines the phase transition point for reception timestamps t2/t4 (ps)
 
 config PORT02_INST01_ANNOUNCE_INTERVAL
-	int "logAnnounceInterval" 
+	int "logAnnounceInterval"
 	default 1
 	range 0 4
 	help
@@ -357,6 +359,11 @@ config PORT02_INST01_MIN_PDELAY_REQ_INTERVAL
 	  The configurable range shall be 0 to 5
 
 endmenu
+
+# Keep T24P_TRANS_POINT also for ports without instances
+config PORT02_INST01_T24P_TRANS_POINT
+    int
+    default 10800
 
 endmenu
 
@@ -471,12 +478,11 @@ config PORT03_INST01_INGRESS_LATENCY
 
 config PORT03_INST01_T24P_TRANS_POINT
     int "timestampCorrectionPortDS.t24p_trans_point (ps)"
-    default 13650
  help
 	 Defines the phase transition point for reception timestamps t2/t4 (ps)
 
 config PORT03_INST01_ANNOUNCE_INTERVAL
-	int "logAnnounceInterval" 
+	int "logAnnounceInterval"
 	default 1
 	range 0 4
 	help
@@ -528,6 +534,11 @@ config PORT03_INST01_MIN_PDELAY_REQ_INTERVAL
 	  The configurable range shall be 0 to 5
 
 endmenu
+
+# Keep T24P_TRANS_POINT also for ports without instances
+config PORT03_INST01_T24P_TRANS_POINT
+    int
+    default 13650
 
 endmenu
 
@@ -642,12 +653,11 @@ config PORT04_INST01_INGRESS_LATENCY
 
 config PORT04_INST01_T24P_TRANS_POINT
     int "timestampCorrectionPortDS.t24p_trans_point (ps)"
-    default 12150
  help
 	 Defines the phase transition point for reception timestamps t2/t4 (ps)
 
 config PORT04_INST01_ANNOUNCE_INTERVAL
-	int "logAnnounceInterval" 
+	int "logAnnounceInterval"
 	default 1
 	range 0 4
 	help
@@ -699,6 +709,11 @@ config PORT04_INST01_MIN_PDELAY_REQ_INTERVAL
 	  The configurable range shall be 0 to 5
 
 endmenu
+
+# Keep T24P_TRANS_POINT also for ports without instances
+config PORT04_INST01_T24P_TRANS_POINT
+    int
+    default 12150
 
 endmenu
 
@@ -813,12 +828,11 @@ config PORT05_INST01_INGRESS_LATENCY
 
 config PORT05_INST01_T24P_TRANS_POINT
     int "timestampCorrectionPortDS.t24p_trans_point (ps)"
-    default 13550
  help
 	 Defines the phase transition point for reception timestamps t2/t4 (ps)
 
 config PORT05_INST01_ANNOUNCE_INTERVAL
-	int "logAnnounceInterval" 
+	int "logAnnounceInterval"
 	default 1
 	range 0 4
 	help
@@ -870,6 +884,11 @@ config PORT05_INST01_MIN_PDELAY_REQ_INTERVAL
 	  The configurable range shall be 0 to 5
 
 endmenu
+
+# Keep T24P_TRANS_POINT also for ports without instances
+config PORT05_INST01_T24P_TRANS_POINT
+    int
+    default 13550
 
 endmenu
 
@@ -984,12 +1003,11 @@ config PORT06_INST01_INGRESS_LATENCY
 
 config PORT06_INST01_T24P_TRANS_POINT
     int "timestampCorrectionPortDS.t24p_trans_point (ps)"
-    default 14500
  help
 	 Defines the phase transition point for reception timestamps t2/t4 (ps)
 
 config PORT06_INST01_ANNOUNCE_INTERVAL
-	int "logAnnounceInterval" 
+	int "logAnnounceInterval"
 	default 1
 	range 0 4
 	help
@@ -1041,6 +1059,11 @@ config PORT06_INST01_MIN_PDELAY_REQ_INTERVAL
 	  The configurable range shall be 0 to 5
 
 endmenu
+
+# Keep T24P_TRANS_POINT also for ports without instances
+config PORT06_INST01_T24P_TRANS_POINT
+    int
+    default 14500
 
 endmenu
 
@@ -1155,12 +1178,11 @@ config PORT07_INST01_INGRESS_LATENCY
 
 config PORT07_INST01_T24P_TRANS_POINT
     int "timestampCorrectionPortDS.t24p_trans_point (ps)"
-    default 13950
  help
 	 Defines the phase transition point for reception timestamps t2/t4 (ps)
 
 config PORT07_INST01_ANNOUNCE_INTERVAL
-	int "logAnnounceInterval" 
+	int "logAnnounceInterval"
 	default 1
 	range 0 4
 	help
@@ -1212,6 +1234,11 @@ config PORT07_INST01_MIN_PDELAY_REQ_INTERVAL
 	  The configurable range shall be 0 to 5
 
 endmenu
+
+# Keep T24P_TRANS_POINT also for ports without instances
+config PORT07_INST01_T24P_TRANS_POINT
+    int
+    default 13950
 
 endmenu
 
@@ -1326,12 +1353,11 @@ config PORT08_INST01_INGRESS_LATENCY
 
 config PORT08_INST01_T24P_TRANS_POINT
     int "timestampCorrectionPortDS.t24p_trans_point (ps)"
-    default 14450
  help
 	 Defines the phase transition point for reception timestamps t2/t4 (ps)
 
 config PORT08_INST01_ANNOUNCE_INTERVAL
-	int "logAnnounceInterval" 
+	int "logAnnounceInterval"
 	default 1
 	range 0 4
 	help
@@ -1383,6 +1409,11 @@ config PORT08_INST01_MIN_PDELAY_REQ_INTERVAL
 	  The configurable range shall be 0 to 5
 
 endmenu
+
+# Keep T24P_TRANS_POINT also for ports without instances
+config PORT08_INST01_T24P_TRANS_POINT
+    int
+    default 14450
 
 endmenu
 
@@ -1497,12 +1528,11 @@ config PORT09_INST01_INGRESS_LATENCY
 
 config PORT09_INST01_T24P_TRANS_POINT
     int "timestampCorrectionPortDS.t24p_trans_point (ps)"
-    default 14750
  help
 	 Defines the phase transition point for reception timestamps t2/t4 (ps)
 
 config PORT09_INST01_ANNOUNCE_INTERVAL
-	int "logAnnounceInterval" 
+	int "logAnnounceInterval"
 	default 1
 	range 0 4
 	help
@@ -1554,6 +1584,11 @@ config PORT09_INST01_MIN_PDELAY_REQ_INTERVAL
 	  The configurable range shall be 0 to 5
 
 endmenu
+
+# Keep T24P_TRANS_POINT also for ports without instances
+config PORT09_INST01_T24P_TRANS_POINT
+    int
+    default 14750
 
 endmenu
 
@@ -1668,12 +1703,11 @@ config PORT10_INST01_INGRESS_LATENCY
 
 config PORT10_INST01_T24P_TRANS_POINT
     int "timestampCorrectionPortDS.t24p_trans_point (ps)"
-    default 15100
  help
 	 Defines the phase transition point for reception timestamps t2/t4 (ps)
 
 config PORT10_INST01_ANNOUNCE_INTERVAL
-	int "logAnnounceInterval" 
+	int "logAnnounceInterval"
 	default 1
 	range 0 4
 	help
@@ -1725,6 +1759,11 @@ config PORT10_INST01_MIN_PDELAY_REQ_INTERVAL
 	  The configurable range shall be 0 to 5
 
 endmenu
+
+# Keep T24P_TRANS_POINT also for ports without instances
+config PORT10_INST01_T24P_TRANS_POINT
+    int
+    default 15100
 
 endmenu
 
@@ -1839,12 +1878,11 @@ config PORT11_INST01_INGRESS_LATENCY
 
 config PORT11_INST01_T24P_TRANS_POINT
     int "timestampCorrectionPortDS.t24p_trans_point (ps)"
-    default 14500
  help
 	 Defines the phase transition point for reception timestamps t2/t4 (ps)
 
 config PORT11_INST01_ANNOUNCE_INTERVAL
-	int "logAnnounceInterval" 
+	int "logAnnounceInterval"
 	default 1
 	range 0 4
 	help
@@ -1896,6 +1934,11 @@ config PORT11_INST01_MIN_PDELAY_REQ_INTERVAL
 	  The configurable range shall be 0 to 5
 
 endmenu
+
+# Keep T24P_TRANS_POINT also for ports without instances
+config PORT11_INST01_T24P_TRANS_POINT
+    int
+    default 14500
 
 endmenu
 
@@ -2010,12 +2053,11 @@ config PORT12_INST01_INGRESS_LATENCY
 
 config PORT12_INST01_T24P_TRANS_POINT
     int "timestampCorrectionPortDS.t24p_trans_point (ps)"
-    default 9850
  help
 	 Defines the phase transition point for reception timestamps t2/t4 (ps)
 
 config PORT12_INST01_ANNOUNCE_INTERVAL
-	int "logAnnounceInterval" 
+	int "logAnnounceInterval"
 	default 1
 	range 0 4
 	help
@@ -2067,6 +2109,11 @@ config PORT12_INST01_MIN_PDELAY_REQ_INTERVAL
 	  The configurable range shall be 0 to 5
 
 endmenu
+
+# Keep T24P_TRANS_POINT also for ports without instances
+config PORT12_INST01_T24P_TRANS_POINT
+    int
+    default 9850
 
 endmenu
 
@@ -2181,12 +2228,11 @@ config PORT13_INST01_INGRESS_LATENCY
 
 config PORT13_INST01_T24P_TRANS_POINT
     int "timestampCorrectionPortDS.t24p_trans_point (ps)"
-    default 14150
  help
 	 Defines the phase transition point for reception timestamps t2/t4 (ps)
 
 config PORT13_INST01_ANNOUNCE_INTERVAL
-	int "logAnnounceInterval" 
+	int "logAnnounceInterval"
 	default 1
 	range 0 4
 	help
@@ -2238,6 +2284,11 @@ config PORT13_INST01_MIN_PDELAY_REQ_INTERVAL
 	  The configurable range shall be 0 to 5
 
 endmenu
+
+# Keep T24P_TRANS_POINT also for ports without instances
+config PORT13_INST01_T24P_TRANS_POINT
+    int
+    default 14150
 
 endmenu
 
@@ -2352,12 +2403,11 @@ config PORT14_INST01_INGRESS_LATENCY
 
 config PORT14_INST01_T24P_TRANS_POINT
     int "timestampCorrectionPortDS.t24p_trans_point (ps)"
-    default 11950
  help
 	 Defines the phase transition point for reception timestamps t2/t4 (ps)
 
 config PORT14_INST01_ANNOUNCE_INTERVAL
-	int "logAnnounceInterval" 
+	int "logAnnounceInterval"
 	default 1
 	range 0 4
 	help
@@ -2409,6 +2459,11 @@ config PORT14_INST01_MIN_PDELAY_REQ_INTERVAL
 	  The configurable range shall be 0 to 5
 
 endmenu
+
+# Keep T24P_TRANS_POINT also for ports without instances
+config PORT14_INST01_T24P_TRANS_POINT
+    int
+    default 11950
 
 endmenu
 
@@ -2523,12 +2578,11 @@ config PORT15_INST01_INGRESS_LATENCY
 
 config PORT15_INST01_T24P_TRANS_POINT
     int "timestampCorrectionPortDS.t24p_trans_point (ps)"
-    default 12900
  help
 	 Defines the phase transition point for reception timestamps t2/t4 (ps)
 
 config PORT15_INST01_ANNOUNCE_INTERVAL
-	int "logAnnounceInterval" 
+	int "logAnnounceInterval"
 	default 1
 	range 0 4
 	help
@@ -2580,6 +2634,11 @@ config PORT15_INST01_MIN_PDELAY_REQ_INTERVAL
 	  The configurable range shall be 0 to 5
 
 endmenu
+
+# Keep T24P_TRANS_POINT also for ports without instances
+config PORT15_INST01_T24P_TRANS_POINT
+    int
+    default 12900
 
 endmenu
 
@@ -2694,12 +2753,11 @@ config PORT16_INST01_INGRESS_LATENCY
 
 config PORT16_INST01_T24P_TRANS_POINT
     int "timestampCorrectionPortDS.t24p_trans_point (ps)"
-    default 13800
  help
 	 Defines the phase transition point for reception timestamps t2/t4 (ps)
 
 config PORT16_INST01_ANNOUNCE_INTERVAL
-	int "logAnnounceInterval" 
+	int "logAnnounceInterval"
 	default 1
 	range 0 4
 	help
@@ -2751,6 +2809,11 @@ config PORT16_INST01_MIN_PDELAY_REQ_INTERVAL
 	  The configurable range shall be 0 to 5
 
 endmenu
+
+# Keep T24P_TRANS_POINT also for ports without instances
+config PORT16_INST01_T24P_TRANS_POINT
+    int
+    default 13800
 
 endmenu
 
@@ -2865,12 +2928,11 @@ config PORT17_INST01_INGRESS_LATENCY
 
 config PORT17_INST01_T24P_TRANS_POINT
     int "timestampCorrectionPortDS.t24p_trans_point (ps)"
-    default 14200
  help
 	 Defines the phase transition point for reception timestamps t2/t4 (ps)
 
 config PORT17_INST01_ANNOUNCE_INTERVAL
-	int "logAnnounceInterval" 
+	int "logAnnounceInterval"
 	default 1
 	range 0 4
 	help
@@ -2922,6 +2984,11 @@ config PORT17_INST01_MIN_PDELAY_REQ_INTERVAL
 	  The configurable range shall be 0 to 5
 
 endmenu
+
+# Keep T24P_TRANS_POINT also for ports without instances
+config PORT17_INST01_T24P_TRANS_POINT
+    int
+    default 14200
 
 endmenu
 
@@ -3036,12 +3103,11 @@ config PORT18_INST01_INGRESS_LATENCY
 
 config PORT18_INST01_T24P_TRANS_POINT
     int "timestampCorrectionPortDS.t24p_trans_point (ps)"
-    default 14350
  help
 	 Defines the phase transition point for reception timestamps t2/t4 (ps)
 
 config PORT18_INST01_ANNOUNCE_INTERVAL
-	int "logAnnounceInterval" 
+	int "logAnnounceInterval"
 	default 1
 	range 0 4
 	help
@@ -3093,6 +3159,11 @@ config PORT18_INST01_MIN_PDELAY_REQ_INTERVAL
 	  The configurable range shall be 0 to 5
 
 endmenu
+
+# Keep T24P_TRANS_POINT also for ports without instances
+config PORT18_INST01_T24P_TRANS_POINT
+    int
+    default 14350
 
 endmenu
 
