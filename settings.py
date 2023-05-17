@@ -13,7 +13,8 @@ fw_version_supported = [
     "5.0.1",
     "5.0-dev",
     "6.0.0",
-    "6.0.1"
+    "6.0.1",
+    "6.1",
     ]
 
 
@@ -25,7 +26,7 @@ encoders = [
         },
     {
         "encoder"   : Encoder_6_0_0(),
-        "versions" : "6.0.0 6.0.1"
+        "versions" : "6.0.0 6.0.1 6.1"
         },
     ]
 
