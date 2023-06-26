@@ -160,10 +160,10 @@ config VLANS_PORT01_PTP_VID
 	 VID used for the PTP messages
 
 config VLANS_PORT01_LLDP_TX_VID
-	int "LLDP TX VID"
+	string "LLDP TX VID"
 	depends on !LLDPD_DISABLE && (VLANS_RAW_PORT_CONFIG || VLANS_PORT01_MODE_TRUNK || VLANS_PORT01_MODE_DISABLED || VLANS_PORT01_MODE_UNQUALIFIED)
-	default 4094 if VLANS_PORT01_MODE_TRUNK
-	default 1
+	default 2586 if VLANS_PORT01_MODE_TRUNK
+	default ""
 	help
 	 VID used for the transmission of LLDP frames. Incoming LLDP frames
 	 are accepted on all VLANs.
@@ -319,10 +319,10 @@ config VLANS_PORT02_PTP_VID
 	 VID used for the PTP messages
 
 config VLANS_PORT02_LLDP_TX_VID
-	int "LLDP TX VID"
+	string "LLDP TX VID"
 	depends on !LLDPD_DISABLE && (VLANS_RAW_PORT_CONFIG || VLANS_PORT02_MODE_TRUNK || VLANS_PORT02_MODE_DISABLED || VLANS_PORT02_MODE_UNQUALIFIED)
-	default 4094 if VLANS_PORT02_MODE_TRUNK
-	default 1
+	default 2586 if VLANS_PORT02_MODE_TRUNK
+	default ""
 	help
 	 VID used for the transmission of LLDP frames. Incoming LLDP frames
 	 are accepted on all VLANs.
@@ -478,10 +478,10 @@ config VLANS_PORT03_PTP_VID
 	 VID used for the PTP messages
 
 config VLANS_PORT03_LLDP_TX_VID
-	int "LLDP TX VID"
+	string "LLDP TX VID"
 	depends on !LLDPD_DISABLE && (VLANS_RAW_PORT_CONFIG || VLANS_PORT03_MODE_TRUNK || VLANS_PORT03_MODE_DISABLED || VLANS_PORT03_MODE_UNQUALIFIED)
-	default 4094 if VLANS_PORT03_MODE_TRUNK
-	default 1
+	default 2586 if VLANS_PORT03_MODE_TRUNK
+	default ""
 	help
 	 VID used for the transmission of LLDP frames. Incoming LLDP frames
 	 are accepted on all VLANs.
@@ -637,10 +637,10 @@ config VLANS_PORT04_PTP_VID
 	 VID used for the PTP messages
 
 config VLANS_PORT04_LLDP_TX_VID
-	int "LLDP TX VID"
+	string "LLDP TX VID"
 	depends on !LLDPD_DISABLE && (VLANS_RAW_PORT_CONFIG || VLANS_PORT04_MODE_TRUNK || VLANS_PORT04_MODE_DISABLED || VLANS_PORT04_MODE_UNQUALIFIED)
-	default 4094 if VLANS_PORT04_MODE_TRUNK
-	default 1
+	default 2586 if VLANS_PORT04_MODE_TRUNK
+	default ""
 	help
 	 VID used for the transmission of LLDP frames. Incoming LLDP frames
 	 are accepted on all VLANs.
@@ -796,10 +796,10 @@ config VLANS_PORT05_PTP_VID
 	 VID used for the PTP messages
 
 config VLANS_PORT05_LLDP_TX_VID
-	int "LLDP TX VID"
+	string "LLDP TX VID"
 	depends on !LLDPD_DISABLE && (VLANS_RAW_PORT_CONFIG || VLANS_PORT05_MODE_TRUNK || VLANS_PORT05_MODE_DISABLED || VLANS_PORT05_MODE_UNQUALIFIED)
-	default 4094 if VLANS_PORT05_MODE_TRUNK
-	default 1
+	default 2586 if VLANS_PORT05_MODE_TRUNK
+	default ""
 	help
 	 VID used for the transmission of LLDP frames. Incoming LLDP frames
 	 are accepted on all VLANs.
@@ -955,10 +955,10 @@ config VLANS_PORT06_PTP_VID
 	 VID used for the PTP messages
 
 config VLANS_PORT06_LLDP_TX_VID
-	int "LLDP TX VID"
+	string "LLDP TX VID"
 	depends on !LLDPD_DISABLE && (VLANS_RAW_PORT_CONFIG || VLANS_PORT06_MODE_TRUNK || VLANS_PORT06_MODE_DISABLED || VLANS_PORT06_MODE_UNQUALIFIED)
-	default 4094 if VLANS_PORT06_MODE_TRUNK
-	default 1
+	default 2586 if VLANS_PORT06_MODE_TRUNK
+	default ""
 	help
 	 VID used for the transmission of LLDP frames. Incoming LLDP frames
 	 are accepted on all VLANs.
@@ -1114,10 +1114,10 @@ config VLANS_PORT07_PTP_VID
 	 VID used for the PTP messages
 
 config VLANS_PORT07_LLDP_TX_VID
-	int "LLDP TX VID"
+	string "LLDP TX VID"
 	depends on !LLDPD_DISABLE && (VLANS_RAW_PORT_CONFIG || VLANS_PORT07_MODE_TRUNK || VLANS_PORT07_MODE_DISABLED || VLANS_PORT07_MODE_UNQUALIFIED)
-	default 4094 if VLANS_PORT07_MODE_TRUNK
-	default 1
+	default 2586 if VLANS_PORT07_MODE_TRUNK
+	default ""
 	help
 	 VID used for the transmission of LLDP frames. Incoming LLDP frames
 	 are accepted on all VLANs.
@@ -1273,10 +1273,10 @@ config VLANS_PORT08_PTP_VID
 	 VID used for the PTP messages
 
 config VLANS_PORT08_LLDP_TX_VID
-	int "LLDP TX VID"
+	string "LLDP TX VID"
 	depends on !LLDPD_DISABLE && (VLANS_RAW_PORT_CONFIG || VLANS_PORT08_MODE_TRUNK || VLANS_PORT08_MODE_DISABLED || VLANS_PORT08_MODE_UNQUALIFIED)
-	default 4094 if VLANS_PORT08_MODE_TRUNK
-	default 1
+	default 2586 if VLANS_PORT08_MODE_TRUNK
+	default ""
 	help
 	 VID used for the transmission of LLDP frames. Incoming LLDP frames
 	 are accepted on all VLANs.
@@ -1432,10 +1432,10 @@ config VLANS_PORT09_PTP_VID
 	 VID used for the PTP messages
 
 config VLANS_PORT09_LLDP_TX_VID
-	int "LLDP TX VID"
+	string "LLDP TX VID"
 	depends on !LLDPD_DISABLE && (VLANS_RAW_PORT_CONFIG || VLANS_PORT09_MODE_TRUNK || VLANS_PORT09_MODE_DISABLED || VLANS_PORT09_MODE_UNQUALIFIED)
-	default 4094 if VLANS_PORT09_MODE_TRUNK
-	default 1
+	default 2586 if VLANS_PORT09_MODE_TRUNK
+	default ""
 	help
 	 VID used for the transmission of LLDP frames. Incoming LLDP frames
 	 are accepted on all VLANs.
@@ -1591,10 +1591,10 @@ config VLANS_PORT10_PTP_VID
 	 VID used for the PTP messages
 
 config VLANS_PORT10_LLDP_TX_VID
-	int "LLDP TX VID"
+	string "LLDP TX VID"
 	depends on !LLDPD_DISABLE && (VLANS_RAW_PORT_CONFIG || VLANS_PORT10_MODE_TRUNK || VLANS_PORT10_MODE_DISABLED || VLANS_PORT10_MODE_UNQUALIFIED)
-	default 4094 if VLANS_PORT10_MODE_TRUNK
-	default 1
+	default 2586 if VLANS_PORT10_MODE_TRUNK
+	default ""
 	help
 	 VID used for the transmission of LLDP frames. Incoming LLDP frames
 	 are accepted on all VLANs.
@@ -1750,10 +1750,10 @@ config VLANS_PORT11_PTP_VID
 	 VID used for the PTP messages
 
 config VLANS_PORT11_LLDP_TX_VID
-	int "LLDP TX VID"
+	string "LLDP TX VID"
 	depends on !LLDPD_DISABLE && (VLANS_RAW_PORT_CONFIG || VLANS_PORT11_MODE_TRUNK || VLANS_PORT11_MODE_DISABLED || VLANS_PORT11_MODE_UNQUALIFIED)
-	default 4094 if VLANS_PORT11_MODE_TRUNK
-	default 1
+	default 2586 if VLANS_PORT11_MODE_TRUNK
+	default ""
 	help
 	 VID used for the transmission of LLDP frames. Incoming LLDP frames
 	 are accepted on all VLANs.
@@ -1909,10 +1909,10 @@ config VLANS_PORT12_PTP_VID
 	 VID used for the PTP messages
 
 config VLANS_PORT12_LLDP_TX_VID
-	int "LLDP TX VID"
+	string "LLDP TX VID"
 	depends on !LLDPD_DISABLE && (VLANS_RAW_PORT_CONFIG || VLANS_PORT12_MODE_TRUNK || VLANS_PORT12_MODE_DISABLED || VLANS_PORT12_MODE_UNQUALIFIED)
-	default 4094 if VLANS_PORT12_MODE_TRUNK
-	default 1
+	default 2586 if VLANS_PORT12_MODE_TRUNK
+	default ""
 	help
 	 VID used for the transmission of LLDP frames. Incoming LLDP frames
 	 are accepted on all VLANs.
@@ -2068,10 +2068,10 @@ config VLANS_PORT13_PTP_VID
 	 VID used for the PTP messages
 
 config VLANS_PORT13_LLDP_TX_VID
-	int "LLDP TX VID"
+	string "LLDP TX VID"
 	depends on !LLDPD_DISABLE && (VLANS_RAW_PORT_CONFIG || VLANS_PORT13_MODE_TRUNK || VLANS_PORT13_MODE_DISABLED || VLANS_PORT13_MODE_UNQUALIFIED)
-	default 4094 if VLANS_PORT13_MODE_TRUNK
-	default 1
+	default 2586 if VLANS_PORT13_MODE_TRUNK
+	default ""
 	help
 	 VID used for the transmission of LLDP frames. Incoming LLDP frames
 	 are accepted on all VLANs.
@@ -2227,10 +2227,10 @@ config VLANS_PORT14_PTP_VID
 	 VID used for the PTP messages
 
 config VLANS_PORT14_LLDP_TX_VID
-	int "LLDP TX VID"
+	string "LLDP TX VID"
 	depends on !LLDPD_DISABLE && (VLANS_RAW_PORT_CONFIG || VLANS_PORT14_MODE_TRUNK || VLANS_PORT14_MODE_DISABLED || VLANS_PORT14_MODE_UNQUALIFIED)
-	default 4094 if VLANS_PORT14_MODE_TRUNK
-	default 1
+	default 2586 if VLANS_PORT14_MODE_TRUNK
+	default ""
 	help
 	 VID used for the transmission of LLDP frames. Incoming LLDP frames
 	 are accepted on all VLANs.
@@ -2386,10 +2386,10 @@ config VLANS_PORT15_PTP_VID
 	 VID used for the PTP messages
 
 config VLANS_PORT15_LLDP_TX_VID
-	int "LLDP TX VID"
+	string "LLDP TX VID"
 	depends on !LLDPD_DISABLE && (VLANS_RAW_PORT_CONFIG || VLANS_PORT15_MODE_TRUNK || VLANS_PORT15_MODE_DISABLED || VLANS_PORT15_MODE_UNQUALIFIED)
-	default 4094 if VLANS_PORT15_MODE_TRUNK
-	default 1
+	default 2586 if VLANS_PORT15_MODE_TRUNK
+	default ""
 	help
 	 VID used for the transmission of LLDP frames. Incoming LLDP frames
 	 are accepted on all VLANs.
@@ -2545,10 +2545,10 @@ config VLANS_PORT16_PTP_VID
 	 VID used for the PTP messages
 
 config VLANS_PORT16_LLDP_TX_VID
-	int "LLDP TX VID"
+	string "LLDP TX VID"
 	depends on !LLDPD_DISABLE && (VLANS_RAW_PORT_CONFIG || VLANS_PORT16_MODE_TRUNK || VLANS_PORT16_MODE_DISABLED || VLANS_PORT16_MODE_UNQUALIFIED)
-	default 4094 if VLANS_PORT16_MODE_TRUNK
-	default 1
+	default 2586 if VLANS_PORT16_MODE_TRUNK
+	default ""
 	help
 	 VID used for the transmission of LLDP frames. Incoming LLDP frames
 	 are accepted on all VLANs.
@@ -2704,10 +2704,10 @@ config VLANS_PORT17_PTP_VID
 	 VID used for the PTP messages
 
 config VLANS_PORT17_LLDP_TX_VID
-	int "LLDP TX VID"
+	string "LLDP TX VID"
 	depends on !LLDPD_DISABLE && (VLANS_RAW_PORT_CONFIG || VLANS_PORT17_MODE_TRUNK || VLANS_PORT17_MODE_DISABLED || VLANS_PORT17_MODE_UNQUALIFIED)
-	default 4094 if VLANS_PORT17_MODE_TRUNK
-	default 1
+	default 2586 if VLANS_PORT17_MODE_TRUNK
+	default ""
 	help
 	 VID used for the transmission of LLDP frames. Incoming LLDP frames
 	 are accepted on all VLANs.
@@ -2863,10 +2863,10 @@ config VLANS_PORT18_PTP_VID
 	 VID used for the PTP messages
 
 config VLANS_PORT18_LLDP_TX_VID
-	int "LLDP TX VID"
+	string "LLDP TX VID"
 	depends on !LLDPD_DISABLE && (VLANS_RAW_PORT_CONFIG || VLANS_PORT18_MODE_TRUNK || VLANS_PORT18_MODE_DISABLED || VLANS_PORT18_MODE_UNQUALIFIED)
-	default 4094 if VLANS_PORT18_MODE_TRUNK
-	default 1
+	default 2586 if VLANS_PORT18_MODE_TRUNK
+	default ""
 	help
 	 VID used for the transmission of LLDP frames. Incoming LLDP frames
 	 are accepted on all VLANs.
