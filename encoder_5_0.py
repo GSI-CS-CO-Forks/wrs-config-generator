@@ -9,14 +9,14 @@ import re
 import sys
 import time
 
-class Encoder_5_0(Encoder): 
-    
+class Encoder_5_0(Encoder):
+
     def __init__(self):
        super(Encoder_5_0, self).__init__()
-    
+
     def encode(self,json_data):
-        lines=[]        
-        # Add header 
+        lines=[]
+        # Add header
         lines=self.getHeaderConfig(json_data)
         # Global config issue from CCDE
         lines+=self.getGlobalConfig(json_data["configurationItems"]);
@@ -45,11 +45,11 @@ class Encoder_5_0(Encoder):
         lines.append(self.buildEntry(self.getItem("CONFIG_DOTCONF_HW_VERSION",json_data["CONFIG_DOTCONF_HW_VERSION"])))
         lines.append(self.buildEntry(self.getItem("CONFIG_DOTCONF_FW_VERSION",self._fwVersion)))
         lines.append(self.buildEntry(self.getItem("CONFIG_DOTCONF_INFO",dotconf_info)))
-        print ("dotconf_info: %s" % dotconf_info) 
+        print ("dotconf_info: %s" % dotconf_info)
         return lines
 
-        
-    def getGlobalConfig(self, gblConfig):        
+
+    def getGlobalConfig(self, gblConfig):
         lines =[]
         for config_item in gblConfig:
             name=config_item["itemConfig"]
@@ -61,7 +61,7 @@ class Encoder_5_0(Encoder):
                 if value == None:
                     continue
                 anItem=None
-                if self.isItemNameDefined(name):  #Already exist. The type must not be changed 
+                if self.isItemNameDefined(name):  #Already exist. The type must not be changed
                     anItem=self.getItem(name,value)
                 else :
                     type = item.itemTypeBool if re.match("(true|false)",value)!=None else item.itemTypeString
@@ -72,14 +72,14 @@ class Encoder_5_0(Encoder):
     def getPortsConfig(self, ports ):
         lines =[]
         PORT_DB_range=list(range(1, 19)) # 1..18
-           
+
         for port_item in ports:
             port_id = int(port_item["portNumber"])
             # check the range of ports
             if not (1 <= port_id <= 18):
                 print ("Error: Port %s out of range!" % port_item["portNumber"])
                 continue
-        
+
             # remove current port id from the list
             PORT_DB_range.remove(port_id)
             anItem=self.getItem("CONFIG_PORT%02u_PARAMS" % (port_id),
@@ -140,7 +140,7 @@ class Encoder_5_0(Encoder):
 
     def getSfpsConfig(self, sfps):
         return self._getSfpsConfig(sfps,10,True)
-    
+
     def _getFibersConfig(self, fibers, maxFibers, fillEmptyFibers):
         FIBER_DB_range=list(range(0, maxFibers)) # 0..3
         lines=[]
@@ -149,7 +149,7 @@ class Encoder_5_0(Encoder):
             fiber_id = int(fiber_item["fiberId"])
             # check the range of fibers
             if not (0 <= fiber_id <= (maxFibers-1)):
-                print ("Error: Fiber %s out of range" % fiber_item["fiberId"]) 
+                print ("Error: Fiber %s out of range" % fiber_item["fiberId"])
                 continue
             # remove current fiber id from the list
             FIBER_DB_range.remove(fiber_id)
@@ -158,7 +158,7 @@ class Encoder_5_0(Encoder):
                 fiber_item["waveLength"],
                 fiber_item["alpha"])
                 )))
-        
+
         # add empty fiber entries if needed
         if fillEmptyFibers :
             for i in FIBER_DB_range:
@@ -168,7 +168,7 @@ class Encoder_5_0(Encoder):
 
     def getFibersConfig(self, fibers):
         return  self._getFibersConfig(fibers,4, True)
-    
+
 
     def getVLansConfig(self, vlanPorts, vlans):
         lines=[]
@@ -184,35 +184,35 @@ class Encoder_5_0(Encoder):
         for vlan_port_data in ports:
             portNumber=int(vlan_port_data["portNumber"])
             vlanPortMode = vlan_port_data["vlanPortMode"]
-            vlanPortVid = vlan_port_data["vlanPortVid"] 
+            vlanPortVid = vlan_port_data["vlanPortVid"]
             vlanPortPrio=vlan_port_data["vlanPortPrio"]
             prefix="CONFIG_VLANS_PORT%02u" % (portNumber)
-            
+
             PORT_DB_range.remove(portNumber)
             if vlanPortMode == "access":
                 vlanPortUntagged=vlan_port_data["vlanPortUntag"] == "true"
-                
-                lines.append(self.buildEntry(self.getItem(prefix+"_MODE_ACCESS","y"))) 
+
+                lines.append(self.buildEntry(self.getItem(prefix+"_MODE_ACCESS","y")))
                 lines.append(self.buildEntry(self.getItem(prefix+"_UNTAG_ALL","y" if vlanPortUntagged else "n")))
                 lines.append(self.buildEntry(self.getItem(prefix+"_UNTAG_NONE","n" if vlanPortUntagged else "y")))
             else:
                 lines.append(self.buildEntry(self.getItem(prefix+"_MODE_ACCESS", "n")))
-        
+
             lines.append(self.buildEntry(
                     self.getItem(prefix+"_MODE_TRUNK","y" if vlanPortMode == "trunk" else "n")))
-        
+
             lines.append(self.buildEntry(
                     self.getItem(prefix+"_MODE_UNQUALIFIED","y" if vlanPortMode == "unqualified" else "n")))
 
             lines.append(self.buildEntry(
                     self.getItem(prefix+"_MODE_DISABLED","y" if vlanPortMode == "disabled" else "n")))
-        
+
             lines.append(
                     self.buildEntry(self.getItem(prefix+"_PRIO" , vlanPortPrio if vlanPortPrio!=None else "-1" ,item.itemTypeInt)))
-        
+
             lines.append(self.buildEntry(
                     self.getItem(prefix+"_VID", vlanPortVid if vlanPortVid!=None else "",item.itemTypeString)))
-        
+
         # add empty port entries if needed
         for i in PORT_DB_range:
             prefix="CONFIG_VLANS_PORT%02u" % (i)
@@ -222,20 +222,20 @@ class Encoder_5_0(Encoder):
             lines.append(self.buildEntry(self.getItem(prefix+"_MODE_UNQUALIFIED","y")))
             lines.append(self.buildEntry(self.getItem(prefix+"_PRIO","-1",item.itemTypeInt)))
             lines.append(self.buildEntry(self.getItem(prefix+"_VID","")))
-        
+
         return lines
-    
+
     def _getVLansVlan(self,vlans) :
         lines=[]
         VLANs_range = list(range(0, 4095)) # 0..4094
         vlans_enable_set = {}
-        
+
         if vlans == []:
             for i in range(1, 4): # 1..3
                 lines.append(self.buildEntry(
                         self.getItem("CONFIG_VLANS_ENABLE_SET%u" % (i),"n")))
             return lines
-        
+
         for vlan_data in vlans:
             vlan_conf_string = ""
             if vlan_data["vid"] == None:
@@ -247,7 +247,7 @@ class Encoder_5_0(Encoder):
                 # this should never happen...
                 print ("Error: Vid not in the range!")
                 continue
-    
+
             if vlan_data["fid"] != None:
                 vlan_conf_string += "fid=%s," % vlan_data["fid"]
             if vlan_data["prio"] != None:
@@ -256,30 +256,29 @@ class Encoder_5_0(Encoder):
                 vlan_conf_string += "drop=y,"
             if vlan_data["ports"] != None:
                 vlan_conf_string += "ports=%s," % vlan_data["ports"]
-    
+
             # remove trailing comma if needed
             vlan_conf_string = vlan_conf_string.rstrip(',')
             lines.append(self.buildEntry(
                             self.getItem("CONFIG_VLANS_VLAN%0004u" % (vid), vlan_conf_string,item.itemTypeString)))
-    
+
             # remove current vid from the list
             VLANs_range.remove(vid)
-        
+
             if (0 <= vid <= 22):
                 vlans_enable_set["1"] = "y"
             if (22 < vid <= 100):
                 vlans_enable_set["2"] = "y"
             if (100 < vid <= 4094):
                 vlans_enable_set["3"] = "y"
-        
+
         # add empty vid entries if needed
         for i in VLANs_range:
             lines.append(self.buildEntry(
                         self.getItem("CONFIG_VLANS_VLAN%0004u" % (i),"")))
-    
+
         for i in range(1, 4): # 1..3
             lines.append(self.buildEntry(
                      self.getItem("CONFIG_VLANS_ENABLE_SET%u" % (i),
                     "y" if str(i) in vlans_enable_set else "n")))
         return lines
-    

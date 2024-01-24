@@ -157,11 +157,13 @@ if (file_json_in != ''):
 # Get data from stdin
 if (json_stdin == 'yes'):
     stdin_data = ""
+
     while True:
         stdin_line = sys.stdin.readline()
         if len(stdin_line) == 0:
             break
         stdin_data += stdin_line
+
     # try to convert stdin_data to json
     try:
         json_data = json.loads(stdin_data)
@@ -179,20 +181,20 @@ if not ("switchName" in json_data):
 print ("Switch name %s" % json_data["switchName"])
 print ("HW version: %s" % json_data["CONFIG_DOTCONF_HW_VERSION"])
 
-fw_version=json_data["CONFIG_DOTCONF_FW_VERSION"]
+fw_version = json_data["CONFIG_DOTCONF_FW_VERSION"]
 if settings.isFirmwareSupported(fw_version):
     print ("FW version: %s" % fw_version)
 else:
     print ("FW version %s not supported! Exiting!" % fw_version)
     sys.exit(1)
 
-encoder=settings.getEncoder(fw_version) 
-if encoder== None :
+encoder = settings.getEncoder(fw_version)
+if encoder == None:
     print ("Cannot get encoder  for FW version %s ! Exiting!" % fw_version)
     sys.exit(1)
 
 # Run the encoder
-lines=encoder.encode(json_data)
+lines = encoder.encode(json_data)
 
 # print lines into the dot-config file
 for line in lines:
@@ -218,20 +220,20 @@ verify_dot_config_env["KCONFIG_CONFIG"] = config_file_abs
 verify_dot_config_env["KCONFIG_OVERWRITECONFIG"] = "y"
 verify_dot_config_command = "../../bin/conf --listnewconfig Kconfig"
 
-if pythonVersion == 3 :
+if pythonVersion == 3:
     process = subprocess.Popen(verify_dot_config_command.split(),
-    			   stdout=subprocess.PIPE,
-    			   stderr=subprocess.PIPE,
+                   stdout=subprocess.PIPE,
+                   stderr=subprocess.PIPE,
                    text=True,
-    			   cwd=kconfig_path,
-    			   env=verify_dot_config_env)
-else :
+                   cwd=kconfig_path,
+                   env=verify_dot_config_env)
+else:
     process = subprocess.Popen(verify_dot_config_command.split(),
                    stdout=subprocess.PIPE,
                    stderr=subprocess.PIPE,
                    cwd=kconfig_path,
                    env=verify_dot_config_env)
-    
+
 output, error = process.communicate()
 
 if error:
@@ -245,22 +247,22 @@ if (config_use_defaults != "yes" and (error or output)):
 
 if (config_use_defaults == "yes"):
     verify_dot_config_command = "../../bin/conf -s --olddefconfig Kconfig"
-    if pythonVersion == 3 :
+    if pythonVersion == 3:
         process = subprocess.Popen(verify_dot_config_command.split(),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
                                 text=True,
-                   			    cwd=kconfig_path,
+                                cwd=kconfig_path,
                                 env=verify_dot_config_env)
-    else :
+    else:
         process = subprocess.Popen(verify_dot_config_command.split(),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
                                 cwd=kconfig_path,
                                 env=verify_dot_config_env)
-        
+
     output, error = process.communicate()
     if error:
-    	print ("Errors:\n%s\n" % error)
+        print ("Errors:\n%s\n" % error)
     if output:
         print ("Missing configuration items 2:\n%s\n" % output)

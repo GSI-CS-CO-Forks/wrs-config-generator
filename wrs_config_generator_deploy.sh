@@ -16,10 +16,10 @@ DEPLOY_PATH="${TOOLS_PATH}/wrs_config_generator_releases"
 GIT_PROJECT="wrs-config-generator"
 GIT_URL=https://gitlab.cern.ch/white-rabbit/${GIT_PROJECT}.git
 
-#Get list of tags 
+#Get list of tags
 tags=`git ls-remote --tags https://gitlab.cern.ch/white-rabbit/wrs-config-generator.git |  grep -v "\^{}" |grep -o 'refs/tags/w[0-9]*\.[0-9]*\.[0-9]*.*' | sort -r | head | grep -o '[^\/]*$' | tr '\n' ' '`
 if [ "$?" != "0" ] ; then
-	printf "Cannot get list of tags !!! Exit.\n" 
+	printf "Cannot get list of tags !!! Exit.\n"
 	exit 1
 fi
 
@@ -43,15 +43,15 @@ menu_header() {
 	printf "# Release dir :\n"
 	printf "#     - ${TOOLS_PATH}\n"
 	local active=$(active_version)
-	if [ -n "$active" ] ; then 	
+	if [ -n "$active" ] ; then 
 		printf "#  Current version:\n"
 		printf "#     - %s\n#\n" "$active"
 	fi
 	local lct=$(list_cloned_tags)
-	if [ -n "$lct" ] ; then 	
+	if [ -n "$lct" ] ; then 
 		printf "#  List of cloned tags :\n"
 		for x in $lct ; do
-			printf "#     - %s\n" "$x" 
+			printf "#     - %s\n" "$x"
 		done
 		printf "#\n"
 	fi
@@ -72,7 +72,7 @@ menu_deploy() {
 		printf "  q) quit\n\n"
 	    printf "\n  Choice: "
 		IFS= read -r opt
-		if [ "$opt" == "q" ] ; then 
+		if [ "$opt" == "q" ] ; then
 			break;
 		fi
 		if [[ $opt =~ ^[0-9]+$ ]] && (( ($opt >= 0) && ($opt <= "${#idep[@]}") ));  then
@@ -80,13 +80,13 @@ menu_deploy() {
     		ln -s ${DEPLOY_PATH}/${idep[$opt]} ${TOOLS_PATH}/${GIT_PROJECT}
     		break
 		else
-		echo 
-    		if [ "$opt" == "q" ] ; then 
+		echo
+    		if [ "$opt" == "q" ] ; then
     			return 0
     		fi
     	fi
     done
-} 
+}
 
 menu_dev() {
 	while : ; do
@@ -121,15 +121,15 @@ menu_dev() {
 clone() {
 	local tagToClone=$1
 	local dirLocation=${DEPLOY_PATH}/${tagToClone}
-	echo "Clonning $tagToClone to ${dirLocation} ..." 
+	echo "Clonning $tagToClone to ${dirLocation} ..."
 	if [ -d ${dirLocation} ] ; then
 		printf "Error: ${dirLocation} directory already exists."
 	else
-		git clone -b $tagToClone ${GIT_URL} ${dirLocation}	
+		git clone -b $tagToClone ${GIT_URL} ${dirLocation}
 		if [ "$?" != "0" ] ; then
 			printf "Error: Cannot clone tag ${tagToClone} !!!\n"
-		else 
-			printf "Success: Tag ${tagToClone} successfully cloned.\n"		 
+		else
+			printf "Success: Tag ${tagToClone} successfully cloned.\n"
 		fi
 	fi
  	sleep 6
@@ -148,8 +148,8 @@ menu_clone() {
 		if [[ $opt =~ ^[0-9]+$ ]] && (( ($opt >= 0) && ($opt <= "${#ifaces[@]}") ));  then
     		clone "${ifaces[$opt]}"
 		else
-		echo 
-    		if [ "$opt" == "q" ] ; then 
+		echo
+    		if [ "$opt" == "q" ] ; then
     			break;
     		fi
     	fi
@@ -172,7 +172,7 @@ menu_main() {
 			"2") menu_dev;;
 			"q") break ;;
 		esac
-    done	
+    done
 }
 
 menu_main

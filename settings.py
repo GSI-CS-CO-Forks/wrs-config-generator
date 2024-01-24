@@ -5,7 +5,7 @@ import item
 from item import Item
 from encoder_5_0 import Encoder_5_0
 from encoder_6_0_0 import Encoder_6_0_0
- 
+
 
 # Supported FW versions
 fw_version_supported = [
@@ -18,7 +18,7 @@ fw_version_supported = [
     ]
 
 
-#Methods used to generate port configuration 
+#Methods used to generate port configuration
 encoders = [
     {
         "encoder"   : Encoder_5_0(),
@@ -32,15 +32,15 @@ encoders = [
 
 def isFirmwareSupported (version):
     return version in fw_version_supported
-    
+
 def __isPresent ( str1, keyword):
     tokenList=str1.split(" ")
- 
+
     for tk in tokenList :
         if tk == keyword :
             return True
     return False
-     
+
 def getEncoder(fwVersion):
     arrSize=len(encoders)
     for idx in range(arrSize):
@@ -49,5 +49,3 @@ def getEncoder(fwVersion):
             encoder.setFwVersion(fwVersion)
             return encoder
     return None
-
-

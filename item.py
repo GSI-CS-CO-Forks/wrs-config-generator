@@ -18,7 +18,7 @@ class Item():
     __value=None
     __type=None
     __actions=itemActionNone
-    
+
     def __init__(self,name,value=None,type=itemTypeNone):
         self.__name=name
         aValue=value
@@ -37,20 +37,20 @@ class Item():
                     type=itemTypeString
         self.__type=type
         self.setValue(aValue)
-     
+
     def setActions(self,actions):
         self.__actions=actions
-         
+
     def getActions(self):
         return self.__actions
-    
+
     @classmethod
     def __isAString(cls, object):
         return isinstance(object, str) or isinstance(object, unicode)
-     
+
     def getName(self):
         return self.__name
-    
+
     def getValue(self):
         return self.__value
 
@@ -64,14 +64,14 @@ class Item():
             else :
                 self.__value=""
         else :
-            if self.__type == itemTypeBool : 
+            if self.__type == itemTypeBool :
                 self.__value="y" if re.match("[yYtT]",value[:1])!=None else "n"
             else :
                 self.__value=value
 
     def getType(self):
         return self.__type
-        
+
     def toString(self):
         line=None
         if self.__type == itemTypeInt :
@@ -82,7 +82,7 @@ class Item():
         elif  self.__type == itemTypeBool :
             if self.__value == "y" :
                 line="%s=%s" % (self.__name, self.__value)
-            else : 
+            else :
                 line="# %s is not set" % (self.__name)
         else:
             line="%s=\"%s\"" % (self.__name, self.__value)
