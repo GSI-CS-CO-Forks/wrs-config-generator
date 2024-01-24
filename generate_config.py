@@ -61,14 +61,14 @@ def get_data_ccde(wrs_name, url, user, password):
 
 # Get data from CCDE
 if args.ccde_url is not None:
+    if args.ccde_dev_name is None:
+        print ("Please specify device name for CCDE access")
+        sys.exit(1)
     if args.ccde_user is None:
         args.ccde_user = getpass.getuser()
         print ("Using system username for CCDE: %s" % args.ccde_user)
     if args.ccde_password is None:
         args.ccde_password = getpass.getpass("Password for user %s to access CCDE:" % args.ccde_user)
-    if args.ccde_dev_name is None:
-        print ("Please specify device name for CCDE access")
-        sys.exit(1)
 
     ccde_data = get_data_ccde(args.ccde_dev_name, args.ccde_url, args.ccde_user, args.ccde_password)
 
