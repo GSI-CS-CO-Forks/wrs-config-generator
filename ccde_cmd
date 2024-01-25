@@ -83,7 +83,7 @@ fi
 tmp_config="$tmp_name"-dot-config
 # Uncomment to remove dot-config, even when this script fails
 # exec 3>"$tmp_json";rm "$tmp_json"
-"$GEN_DIR"/generate_config --json="$tmp_json" --config="$tmp_config"
+"$GEN_DIR"/generate_config.py --json="$tmp_json" --config="$tmp_config"
 [ $test_mode -eq 1 ] ||  rm "$tmp_json"
 
 [ $debug -ne 0 ] && echo "tmp_config=$tmp_config"

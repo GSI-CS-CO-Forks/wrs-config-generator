@@ -58,7 +58,7 @@ class Encoder_6_0_0(Encoder_5_0):
             isTimeBC=anItem.getValue()=="y"
         lines =[]
         nbPorts=18
-        PORT_DB_range=range(1, nbPorts+1) # 1..18
+        PORT_DB_range=list(range(1, nbPorts+1)) # 1..18
 
         # Check all ports
         isExternalPortConfiguration=False

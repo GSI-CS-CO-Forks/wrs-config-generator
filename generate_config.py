@@ -19,7 +19,6 @@ import settings
 URL_CCDE = 'https://ccde.cern.ch/api/'
 URL_CCDE_DEV = 'https://ccde-dev.cern.ch/api/'
 
-pythonVersion=sys.version_info[0]
 script_dir = os.path.dirname(os.path.abspath(__file__)) # script location directory
 try:
     version = os.popen("cd " + script_dir + "; git describe --always --dirty").read().strip()
@@ -52,7 +51,7 @@ args = parser.parse_args()
 
 
 def get_data_ccde(wrs_name, url, user, password):
-    authData = base64.encodestring('%s:%s' % (user, password)).replace('\n', '')
+    authData = base64.b64encode('{0}:{1}'.format(user, password).encode('ascii'))
     s = requests.Session()
     s.post(url + 'acw/login', data={'authentication':authData}, verify=False)
     r = s.get(url + 'whiterabbit/switches/' + wrs_name + '/configuration', verify=False)
@@ -165,26 +164,17 @@ verify_dot_config_env["KCONFIG_CONFIG"] = config_file_abs
 verify_dot_config_env["KCONFIG_OVERWRITECONFIG"] = "y"
 verify_dot_config_command = "../../bin/conf --listnewconfig Kconfig"
 
-if pythonVersion == 3:
-    process = subprocess.Popen(verify_dot_config_command.split(),
-                   stdout=subprocess.PIPE,
-                   stderr=subprocess.PIPE,
-                   text=True,
-                   cwd=kconfig_path,
-                   env=verify_dot_config_env)
-else:
-    process = subprocess.Popen(verify_dot_config_command.split(),
-                   stdout=subprocess.PIPE,
-                   stderr=subprocess.PIPE,
-                   cwd=kconfig_path,
-                   env=verify_dot_config_env)
-
+process = subprocess.Popen(verify_dot_config_command.split(),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                cwd=kconfig_path,
+                env=verify_dot_config_env)
 output, error = process.communicate()
 
 if error:
-    print ("Errors:\n%s\n" % error)
+    print ("Errors:\n%s\n" % error.decode('ascii'))
 if output:
-    print ("Missing configuration items 1:\n%s\n" % output)
+    print ("Missing configuration items 1:\n%s\n" % output.decode('ascii'))
 
 if (not args.config_use_defaults and (error or output)):
     print ("Dot-config contains errors! Exiting!")
@@ -192,22 +182,14 @@ if (not args.config_use_defaults and (error or output)):
 
 if args.config_use_defaults:
     verify_dot_config_command = "../../bin/conf -s --olddefconfig Kconfig"
-    if pythonVersion == 3:
-        process = subprocess.Popen(verify_dot_config_command.split(),
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                text=True,
-                                cwd=kconfig_path,
-                                env=verify_dot_config_env)
-    else:
-        process = subprocess.Popen(verify_dot_config_command.split(),
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                cwd=kconfig_path,
-                                env=verify_dot_config_env)
-
+    process = subprocess.Popen(verify_dot_config_command.split(),
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            cwd=kconfig_path,
+                            env=verify_dot_config_env)
     output, error = process.communicate()
+
     if error:
-        print ("Errors:\n%s\n" % error)
+        print ("Errors:\n%s\n" % error.decode('ascii'))
     if output:
-        print ("Missing configuration items 2:\n%s\n" % output)
+        print ("Missing configuration items 2:\n%s\n" % output.decode('ascii'))
