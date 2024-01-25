@@ -64,20 +64,17 @@ if [ -n "$commit_user_tmp" ]; then
     # strip quotas
     commit_user=${commit_user//\"/}
 
-    phonebook_out=`/usr/bin/phonebook "$commit_user" -t surname -t firstname -t email`
-    ret=$?
-    if [ -n "$phonebook_out" ] && [ $ret -eq 0 ]; then
-        IFS=";" read -r author_surname author_firstname author_email <<< $phonebook_out
-    fi
+    ldap_data=$(ldapsearch -Q -LLL -E pr=2/noprompt -b 'ou=users,ou=organic units,dc=cern,dc=ch' cn=$commit_user displayName mail | tr -d '\n')
+    author_name=$(echo "$ldap_data" | /usr/bin/grep -oP 'displayName: \K.*(?=mail:)')
+    author_email=$(echo "$ldap_data" | /usr/bin/grep -oP 'mail: \K.*(?=#)')
 else
-    author_surname="unknown"
+    author_name="unknown"
     author_email="unknown@cern.ch"
     commit_user="unknown"
 fi
 
 if [ $debug -ne 0 ]; then
-    echo "author_firstname=|$author_firstname|"
-    echo "author_surname=|$author_surname|"
+    echo "author_name=|$author_name|"
     echo "author_email=|$author_email|"
 fi
 tmp_config="$tmp_name"-dot-config
@@ -129,7 +126,7 @@ do
     git add "$commit_file"
 
     # make sure there is an user defined in the .gitconfig
-    git commit $GIT_V --author="$author_firstname $author_surname <$author_email>" -m "file=$commit_file, date=$date, user=$commit_user" --signoff -- "$commit_file"
+    git commit $GIT_V --author="$author_name <$author_email>" -m "file=$commit_file, date=$date, user=$commit_user" --signoff -- "$commit_file"
     ret=$?
     if [ $ret -ne 0 ]; then
         echo "Warning! Unable to create a commit! (return=$ret) Exiting!"
