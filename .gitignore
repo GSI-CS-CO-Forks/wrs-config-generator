@@ -1,2 +1,4 @@
 dot-config
 dot-config.old
+*.pyc
+__pycache__
