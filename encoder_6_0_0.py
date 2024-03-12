@@ -9,6 +9,7 @@ class Encoder_6_0_0(Encoder_5_0):
 
     def __init__(self):
        super(Encoder_6_0_0, self).__init__()
+       self.nbPorts=18
 
     def getGlobalConfig(self, gblConfig):
         lines=super(Encoder_6_0_0, self).getGlobalConfig(gblConfig)
@@ -44,8 +45,7 @@ class Encoder_6_0_0(Encoder_5_0):
             lines.append(self.buildEntry(self.getItem("CONFIG_SNMP_SYSTEM_CLOCK_MONITOR_ENABLED","n")))
         return lines
 
-    # Add port configuration for version 5.1.0 to ...
-    def getPortsConfig(self, ports ):
+    def isExternalPortConfig(self, ports):
         # if one slave port and all other ports are master then externalPortConfiguration is used.
         # Are considered as master port :
         #    - master (obvious)
@@ -56,12 +56,7 @@ class Encoder_6_0_0(Encoder_5_0):
         if self.isItemNameDefined("CONFIG_TIME_BC") :
             anItem=self.getItem("CONFIG_TIME_BC")
             isTimeBC=anItem.getValue()=="y"
-        lines =[]
-        nbPorts=18
-        PORT_DB_range=list(range(1, nbPorts+1)) # 1..18
 
-        # Check all ports
-        isExternalPortConfiguration=False
         if isTimeBC :
             nbSlaves=0
             nbMasters=0
@@ -71,12 +66,20 @@ class Encoder_6_0_0(Encoder_5_0):
                     nbSlaves+=1
                 elif ptpRole=="master" or ptpRole=="none" or ptpRole=="non-wr" :
                     nbMasters+=1
-            isExternalPortConfiguration=(nbSlaves==1) and nbMasters==(nbPorts-1)
+
+        return (nbSlaves==1) and nbMasters==(self.nbPorts-1)
+
+
+    # Add port configuration for version 5.1.0 to ...
+    def getPortsConfig(self, ports):
+        lines=[]
+        externalPortConfig = self.isExternalPortConfig(ports)
+        PORT_DB_range=list(range(1, self.nbPorts+1)) # 1..18
 
         # Enable external port configuration only for a boundary clock
         lines.append(self.buildEntry(
             self.getItem("CONFIG_PTP_OPT_EXT_PORT_CONFIG_ENABLED",
-                         "y" if isExternalPortConfiguration else "n",item.itemTypeBool)))
+                         "y" if externalPortConfig else "n",item.itemTypeBool)))
         lines.append(self.buildEntry(self.getItem("CONFIG_PTP_SLAVE_ONLY","n")))
         for port_item in ports:
             port_id = int(port_item["portNumber"])
@@ -112,7 +115,7 @@ class Encoder_6_0_0(Encoder_5_0):
             profile= "WR" if ptpRole!="none" else "PTP"
             lines.append(self.buildEntry(
                 self.getItem("%s_PROFILE_%s" % (instCfgName,profile),"y")))
-            if ( isExternalPortConfiguration ) :
+            if externalPortConfig:
                 lines.append(self.buildEntry(
                     self.getItem("%s_DESIRADE_STATE_%s" % (
                         instCfgName,
