@@ -57,15 +57,17 @@ class Encoder_6_0_0(Encoder_5_0):
             anItem=self.getItem("CONFIG_TIME_BC")
             isTimeBC=anItem.getValue()=="y"
 
-        if isTimeBC :
-            nbSlaves=0
-            nbMasters=0
-            for port_item in ports:
-                ptpRole=port_item["ptpRole"]
-                if ptpRole=="slave" :
-                    nbSlaves+=1
-                elif ptpRole=="master" or ptpRole=="none" or ptpRole=="non-wr" :
-                    nbMasters+=1
+        if not isTimeBC :
+            return False
+
+        nbSlaves=0
+        nbMasters=0
+        for port_item in ports:
+            ptpRole=port_item["ptpRole"]
+            if ptpRole=="slave" :
+                nbSlaves+=1
+            elif ptpRole=="master" or ptpRole=="none" or ptpRole=="non-wr" :
+                nbMasters+=1
 
         return (nbSlaves==1) and nbMasters==(self.nbPorts-1)
 
