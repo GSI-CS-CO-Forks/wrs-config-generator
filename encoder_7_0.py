@@ -26,9 +26,9 @@ class Encoder_7_0(Encoder_6_0_0):
             # Port profile
             profileCfg = None
 
-            if portDesc["ptpRole"] == "none":       # port disabled
+            if portDesc["ptpRole"] == "none":       # port disabled, no profile enabled
                 pass
-            elif portDesc["ptpRole"] == "non-wr":   # plain PTP
+            elif portDesc["ptpRole"] == "ptp":      # plain PTP
                 profileCfg = "{0}_INST01_PROFILE_PTP".format(portCfgName)
             else:
                 profileCfg = "{0}_INST01_PROFILE_HA_WR".format(portCfgName)
