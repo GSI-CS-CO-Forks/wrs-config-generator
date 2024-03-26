@@ -224,7 +224,7 @@ config ROOT_ACCESS_DISABLE
 
 config LDAP_ENABLE
 	bool "Enable LDAP authorization"
-	default false
+	default n
 	help
 	  Enable LDAP authorization. Used by ssh.
 
@@ -643,6 +643,19 @@ config TIME_CUSTOM
 
 endchoice
 
+config PTP_OPT_PTP_VERSION_OVERWRITE
+	boolean "Allow the overwrite of the default PTP version per instance"
+	default n
+	help
+	  This option is required to overwrite the PTP version used in
+	  the transmitted PTP messages. The actual setting is done in
+	  the per instance configuration menu.
+	  If this option is not set, the PTP version is set based on the used
+	  extension (not profile!).
+	  If no extension or HA/L1Sync is used, PTP version is set to
+	  v2.1 (IEEE1588-2019).
+	  If WR extension is used then PTP version is set to
+	  v2.0 (IEEE1588-2008).
 
 config PTP_OPT_OVERWRITE_ATTRIBUTES
 	boolean "Overwrite default values of PTP attributes"
@@ -653,8 +666,7 @@ config PTP_OPT_OVERWRITE_ATTRIBUTES
 	  of the timing mode for the clock accuracy, the clock Allan variance.
 
 config PTP_OPT_DOMAIN_NUMBER
-	int "domain-number"
-	depends on PTP_OPT_OVERWRITE_ATTRIBUTES || TIME_CUSTOM
+	int "domain-number" if PTP_OPT_OVERWRITE_ATTRIBUTES || TIME_CUSTOM
 	default 0
 	range 0 255
 	help
@@ -664,29 +676,17 @@ config PTP_OPT_DOMAIN_NUMBER
 	  timescale. PTP devices may participate in multiple domains.
 	  For more details please refer to the IEEE 1588-2019 standard.
 
-config PTP_OPT_DOMAIN_NUMBER_VAL
-	int
-	default PTP_OPT_DOMAIN_NUMBER if PTP_OPT_OVERWRITE_ATTRIBUTES || TIME_CUSTOM
-	default 0
-
 config PTP_OPT_PRIORITY1
-	int "priority1"
-	depends on PTP_OPT_OVERWRITE_ATTRIBUTES || TIME_CUSTOM
-	default "128"
+	int "priority1" if PTP_OPT_OVERWRITE_ATTRIBUTES || TIME_CUSTOM
+	default 128
 	range 0 255
 	help
 	  A user configurable designation that a clock belongs to an ordered
 	  set of PTP devices from which a PTP Master is selected.
 	  For more details please refer to the IEEE 1588-2019 standard
 
-config PTP_OPT_PRIORITY1_VAL
-	int
-	default PTP_OPT_PRIORITY1 if PTP_OPT_OVERWRITE_ATTRIBUTES || TIME_CUSTOM
-	default 128
-
 config PTP_OPT_PRIORITY2
-	int "priority2"
-	depends on PTP_OPT_OVERWRITE_ATTRIBUTES || TIME_CUSTOM
+	int "priority2" if PTP_OPT_OVERWRITE_ATTRIBUTES || TIME_CUSTOM
 	default 128
 	range 0 255
 	help
@@ -694,14 +694,8 @@ config PTP_OPT_PRIORITY2
 	  among otherwise equivalent PTP devices.
 	  For more details please refer to the IEEE 1588-2019 standard
 
-config PTP_OPT_PRIORITY2_VAL
-	int
-	default PTP_OPT_PRIORITY2 if PTP_OPT_OVERWRITE_ATTRIBUTES || TIME_CUSTOM
-	default 128
-
 config PTP_OPT_CLOCK_ACCURACY
-	int "clock-accuracy"
-	depends on PTP_OPT_OVERWRITE_ATTRIBUTES || TIME_CUSTOM
+	int "clock-accuracy" if PTP_OPT_OVERWRITE_ATTRIBUTES || TIME_CUSTOM
 	default 33  if TIME_GM || TIME_ARB_GM
 	default 32  if TIME_FM
 	default 254
@@ -711,16 +705,8 @@ config PTP_OPT_CLOCK_ACCURACY
 	  oscillator) of a Boundary Clock or Ordinary Clock.
 	  For more details please refer to the IEEE 1588-2019 standard.
 
-config PTP_OPT_CLOCK_ACCURACY_VAL
-	int
-	default PTP_OPT_CLOCK_ACCURACY if PTP_OPT_OVERWRITE_ATTRIBUTES || TIME_CUSTOM
-	default 33  if TIME_GM || TIME_ARB_GM
-	default 32  if TIME_FM
-	default 254
-
 config PTP_OPT_CLOCK_ALLAN_VARIANCE
-	int "clock-allan-variance/offsetScaledLogVariance"
-	depends on PTP_OPT_OVERWRITE_ATTRIBUTES || TIME_CUSTOM
+	int "clock-allan-variance/offsetScaledLogVariance" if PTP_OPT_OVERWRITE_ATTRIBUTES || TIME_CUSTOM
 	default 47360 if TIME_GM || TIME_ARB_GM
 	default 50973 if TIME_FM
 	default 65535
@@ -730,16 +716,8 @@ config PTP_OPT_CLOCK_ALLAN_VARIANCE
 	  Boundary Clock or Ordinary Clock.
 	  For more details please refer to the IEEE 1588-2019 standard.
 
-config PTP_OPT_CLOCK_ALLAN_VARIANCE_VAL
-	int
-	default PTP_OPT_CLOCK_ALLAN_VARIANCE if PTP_OPT_OVERWRITE_ATTRIBUTES || TIME_CUSTOM
-	default 47360 if TIME_GM || TIME_ARB_GM
-	default 50973 if TIME_FM
-	default 65535
-
 config PTP_OPT_TIME_SOURCE
-	int "time-source"
-	depends on (!TIME_BC) && (PTP_OPT_OVERWRITE_ATTRIBUTES || TIME_CUSTOM)
+	int "time-source" if (!TIME_BC) && (PTP_OPT_OVERWRITE_ATTRIBUTES || TIME_CUSTOM)
 	default 32 if TIME_GM || TIME_ARB_GM
 	default 160 if TIME_FM
 	default 160
@@ -748,17 +726,8 @@ config PTP_OPT_TIME_SOURCE
 	  This information-only attribute indicates the source of time used
 	  by the grandmaster (or free-running master).
 
-config PTP_OPT_TIME_SOURCE_VAL
-	int
-	default PTP_OPT_TIME_SOURCE if (!TIME_BC) && (PTP_OPT_OVERWRITE_ATTRIBUTES || TIME_CUSTOM)
-	default 32 if TIME_GM || TIME_ARB_GM
-	default 160 if TIME_FM
-	default 160
-
-
 config PTP_OPT_CLOCK_CLASS
-	int "clock-class"
-	depends on TIME_CUSTOM
+	int "clock-class" if TIME_CUSTOM
 	default 6 if TIME_GM
 	range 6 6 if TIME_GM
 	default 13 if TIME_ARB_GM
@@ -774,15 +743,6 @@ config PTP_OPT_CLOCK_CLASS
 	  expected performance of the time or frequency distributed by a
 	  Boundary Clock or Ordinary Clock.
 	  For more details please refer to the IEEE 1588-2019 standard.
-
-config PTP_OPT_CLOCK_CLASS_VAL
-	int
-	default PTP_OPT_CLOCK_CLASS if TIME_CUSTOM
-	default 6 if TIME_GM
-	default 13 if TIME_ARB_GM
-	default 193 if TIME_FM
-	default 248 if TIME_BC
-	default 248 if TIME_CUSTOM
 
 endmenu #"PPSI options"
 
@@ -843,6 +803,7 @@ config PPSGEN_FR_ON_SYNC_ONLY
 
 config EXT_PPS_LATENCY_PS
 	int "Compensate signal skew between PPS IN and PPS OUT (in ps)"
+	depends on TIME_GM || TIME_ARB_GM || TIME_CUSTOM
 	default "0"
 	help
 	  If one needs to precisely align 1-PPS output with 1-PPS input when WRS
@@ -992,7 +953,7 @@ config SNMP_TEMP_THOLD_PSR
 
 config SNMP_SWCORESTATUS_DISABLE
 	bool "Force SNMP object wrsSwcoreStatus to be always OK"
-	default false
+	default n
 	help
 	  Disable checking SNMP object wrsSwcoreStatus"
 

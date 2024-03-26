@@ -35,8 +35,8 @@ def test_timing_gm(encoder, json_data):
     assert(dotconfig["CONFIG_TIME_FM"].value == None)
 
     # Options dependent on the timing mode
-    assert(dotconfig["CONFIG_PTP_OPT_TIME_SOURCE_VAL"].value == 0x20)
-    assert(dotconfig["CONFIG_PTP_OPT_CLOCK_CLASS_VAL"].value == 6)
+    assert(dotconfig["CONFIG_PTP_OPT_TIME_SOURCE"].value == 0x20)
+    assert(dotconfig["CONFIG_PTP_OPT_CLOCK_CLASS"].value == 6)
 
 
 def test_timing_bc(encoder, json_data):
@@ -52,8 +52,8 @@ def test_timing_bc(encoder, json_data):
     assert(dotconfig["CONFIG_TIME_FM"].value == None)
 
     # Options dependent on the timing mode
-    assert(dotconfig["CONFIG_PTP_OPT_TIME_SOURCE_VAL"].value == 0xa0)
-    assert(dotconfig["CONFIG_PTP_OPT_CLOCK_CLASS_VAL"].value == 248)
+    assert(dotconfig["CONFIG_PTP_OPT_TIME_SOURCE"].value == 0xa0)
+    assert(dotconfig["CONFIG_PTP_OPT_CLOCK_CLASS"].value == 248)
 
 
 def test_timing_fm(encoder, json_data):
@@ -69,8 +69,8 @@ def test_timing_fm(encoder, json_data):
     assert(dotconfig["CONFIG_TIME_FM"].value == True)
 
     # Options dependent on the timing mode
-    assert(dotconfig["CONFIG_PTP_OPT_TIME_SOURCE_VAL"].value == 0xa0)
-    assert(dotconfig["CONFIG_PTP_OPT_CLOCK_CLASS_VAL"].value == 193)
+    assert(dotconfig["CONFIG_PTP_OPT_TIME_SOURCE"].value == 0xa0)
+    assert(dotconfig["CONFIG_PTP_OPT_CLOCK_CLASS"].value == 193)
 
 
 def test_ext_port_cfg_enable(encoder, json_data):
