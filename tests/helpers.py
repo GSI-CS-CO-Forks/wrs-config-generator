@@ -16,12 +16,13 @@ PORTS_RANGE = range(1, PORTS_COUNT + 1)
 class GenerateArgs:     # only arguments used by generate() function
     config_file: str
     config_use_defaults: bool
+    fw_version: str
 
 
 def execute_generate(json_data, use_defaults=True):
     """ Generates a dotconfig file using specific JSON data """
     config_file = tempfile.NamedTemporaryFile().name
-    generate(GenerateArgs(config_file, use_defaults), json_data)
+    generate(GenerateArgs(config_file, use_defaults, None), json_data)
     return DotConfig.from_file(config_file)
 
 

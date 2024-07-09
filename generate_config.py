@@ -19,7 +19,8 @@ def generate(args, json_data):
     print ("Switch name %s" % json_data["switchName"])
     print ("HW version: %s" % json_data["CONFIG_DOTCONF_HW_VERSION"])
 
-    fw_version = json_data["CONFIG_DOTCONF_FW_VERSION"]
+    fw_version = args.fw_version if args.fw_version is not None \
+                    else json_data["CONFIG_DOTCONF_FW_VERSION"]
     if settings.isFirmwareSupported(fw_version):
         print ("FW version: %s" % fw_version)
     else:
@@ -123,6 +124,8 @@ if __name__ == '__main__':
             help='Save generated dot-config in the file.')
     parser.add_argument('--dev', action='store', dest='ccde_dev_name',
             help='Specify device name')
+    parser.add_argument('--fw-version', action='store', dest='fw_version',
+            help='Enforces a specific firmware version')
     parser.add_argument('--no-use-defaults', action='store_false', dest='config_use_defaults',
             help='Do not use defaults for configuration items not defined in JSON/CCDE.')
     args = parser.parse_args()
