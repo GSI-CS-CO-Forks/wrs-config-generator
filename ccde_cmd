@@ -95,6 +95,11 @@ sed -i "s/CONFIG_DOTCONF_INFO=\(.*\)\"/CONFIG_DOTCONF_INFO=\1md5sum=$md5sum_conf
 boot_server_hostname=${boot_server//.cern.ch/}
 [ $debug -ne 0 ] && echo "boot_server_hostname=$boot_server_hostname"
 
+if [ "$boot_server_hostname" = "null" ]; then
+    echo "Error! Boot server (landbHcpNextServer) is not set! Check LanDB settings"
+    exit 1
+fi
+
 repo_remote_name=wrs-configs-$boot_server_hostname
 [ $test_mode -eq 1 ] && repo_remote_name=wrs-configs-tests
 
