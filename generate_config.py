@@ -8,6 +8,10 @@ import subprocess
 import os
 import settings
 
+# TODO add certificate files
+import urllib3
+urllib3.disable_warnings()  # disables InsecureRequestWarning
+
 
 def generate(args, json_data):
     config_fd = open(args.config_file, 'w')
