@@ -62,26 +62,11 @@ def generate(args, json_data):
     verify_dot_config_command = "../../bin/conf --listnewconfig Kconfig"
 
     process = subprocess.Popen(verify_dot_config_command.split(),
-<<<<<<< HEAD
-    			   stdout=subprocess.PIPE,
-    			   stderr=subprocess.PIPE,
-    			   cwd=kconfig_path,
-    			   env=verify_dot_config_env)
-else :
-    process = subprocess.Popen(verify_dot_config_command.split(),
-                   stdout=subprocess.PIPE,
-                   stderr=subprocess.PIPE,
-                   cwd=kconfig_path,
-                   env=verify_dot_config_env)
-    
-output, error = process.communicate()
-=======
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     cwd=kconfig_path,
                     env=verify_dot_config_env)
     output, error = process.communicate()
->>>>>>> master
 
     if error:
         print ("Errors:\n%s\n" % error.decode('ascii'))
@@ -91,20 +76,8 @@ output, error = process.communicate()
     if (not args.config_use_defaults and (error or output)):
         raise RuntimeError("Dot-config contains errors")
 
-<<<<<<< HEAD
-if (config_use_defaults == "yes"):
-    verify_dot_config_command = "../../bin/conf -s --olddefconfig Kconfig"
-    if pythonVersion == 3 :
-        process = subprocess.Popen(verify_dot_config_command.split(),
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                   			    cwd=kconfig_path,
-                                env=verify_dot_config_env)
-    else :
-=======
     if args.config_use_defaults:
         verify_dot_config_command = "../../bin/conf -s --olddefconfig Kconfig"
->>>>>>> master
         process = subprocess.Popen(verify_dot_config_command.split(),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
