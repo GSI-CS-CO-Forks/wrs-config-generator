@@ -280,7 +280,7 @@ class Encoder_6_0_0(Encoder_5_0):
 
             # Evaluate LLDP TX settings
             lines.append(self.buildEntry(
-                    self.getItem(prefix+"_LLDP_TX_VID", vlanPortLldpTxVid if vlanPortLldpTxVid!=None else "",item.itemTypeString)))
+                    self.getItem(prefix+"_LLDP_TX_VID", vlanPortLldpTxVid if vlanPortLldpTxVid!=None else "4094",item.itemTypeInt)))
 
             lines.append(self.buildEntry(
                     self.getItem(prefix+"_LLDP_TX_PRIO", vlanPortLldpTxPrio if vlanPortLldpTxPrio!=None else "0",item.itemTypeInt)))
