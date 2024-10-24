@@ -12,17 +12,17 @@ class Encoder(object):
     _fwVersion=None
     _items=[]
 #     _wrsConfig=wrs_config.WrsConfig()
-#     
+#
     def __init__(self):
         pass
-    
+
     def getWrsConfig(self):
         return self.wrsConfig
 
     def setFwVersion(self,fwVersion):
         self._fwVersion=fwVersion
         self._loadItems()
- 
+
     def _loadItems(self):
         # the directory of the script being run
         script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -41,10 +41,10 @@ class Encoder(object):
             if self._decodeLine(line)==False :
                 return False
         return True
-        
+
     def __removeQuotes(self, str):
-        return re.sub("(^\"|\"$)",'',str) 
-    
+        return re.sub("(^\"|\"$)",'',str)
+
     def _decodeLine(self, line):
         if line == None :
             return None
@@ -85,12 +85,12 @@ class Encoder(object):
         anItem.setActions(actions)
         self._items.append(anItem)
         return True
-            
-        
+
+
     def buildEntry(self,item):
 #         self._wrsConfig.addItem(item)
         return item.toString()
-    
+
     def getItem(self, name,value=None,type=item.itemTypeNone):
         for anItem in self._items :
             if anItem.getName() == name :
@@ -101,24 +101,22 @@ class Encoder(object):
         self._items.append(anItem)
         return anItem
 
-    
+
     def isItemToSkip(self, name):
         for anItem in self._items :
             if anItem.getName() == name :
                 return (anItem.getActions() & item.itemActionSkip)==item.itemActionSkip
         return False
-            
+
     def getItemsToAdd(self):
         it=[]
         for anItem in self._items :
             if (anItem.getActions() & item.itemActionAdd ) == item.itemActionAdd :
                 it.append(anItem)
-        return it 
-    
+        return it
+
     def isItemNameDefined(self, name):
         for anItem in self._items :
             if anItem.getName() == name :
                 return True
         return False
-
-    

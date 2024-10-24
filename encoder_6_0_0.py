@@ -1,4 +1,3 @@
-
 # Jean-Claude Bau, CERN, 2019
 
 import settings
@@ -7,10 +6,11 @@ import item
 from encoder_5_0 import Encoder_5_0
 
 class Encoder_6_0_0(Encoder_5_0):
-    
+
     def __init__(self):
        super(Encoder_6_0_0, self).__init__()
- 
+       self.nbPorts=18
+
     def getGlobalConfig(self, gblConfig):
         lines=super(Encoder_6_0_0, self).getGlobalConfig(gblConfig)
         # Set Clock class
@@ -26,7 +26,7 @@ class Encoder_6_0_0(Encoder_5_0):
                     clockClass=clk;
                     break;
         lines.append(self.buildEntry(self.getItem("CONFIG_PTP_OPT_CLOCK_CLASS",str(clockClass))))
-            
+
         # SNMP_SYSTEM_CLOCK
         enabled=False
         if self.isItemNameDefined("CONFIG_SNMP_SYSTEM_CLOCK_MONITOR_ENABLED") :
@@ -40,52 +40,56 @@ class Encoder_6_0_0(Encoder_5_0):
             lines.append(self.buildEntry(self.getItem("CONFIG_SNMP_SYSTEM_CLOCK_UNIT_MINUTES","y")))
             lines.append(self.buildEntry(self.getItem("CONFIG_SNMP_SYSTEM_CLOCK_CHECK_INTERVAL_MINUTES","30")))
         return lines
- 
-    # Add port configuration for version 5.1.0 to ...
-    def getPortsConfig(self, ports ):
+
+    def isExternalPortConfig(self, ports):
         # if one slave port and all other ports are master then externalPortConfiguration is used.
         # Are considered as master port :
         #    - master (obvious)
         #    - non-wr (WR extension + monitoring disabled)
-        #    - none   (Empty port ) 
+        #    - none   (Empty port )
         # externalPortConfiguration is also possible only if it is a boundary clock
         isTimeBC=False
         if self.isItemNameDefined("CONFIG_TIME_BC") :
             anItem=self.getItem("CONFIG_TIME_BC")
             isTimeBC=anItem.getValue()=="y"
-        lines =[]
-        nbPorts=18
-        PORT_DB_range=list(range(1, nbPorts+1)) # 1..18
-    
-        # Check all ports
-        isExternalPortConfiguration=False
-        if isTimeBC :
-            nbSlaves=0
-            nbMasters=0
-            for port_item in ports:
-                ptpRole=port_item["ptpRole"]
-                if ptpRole=="slave" :
-                    nbSlaves+=1
-                elif ptpRole=="master" or ptpRole=="none" or ptpRole=="non-wr" : 
-                    nbMasters+=1
-            isExternalPortConfiguration=(nbSlaves==1) and nbMasters==(nbPorts-1)
-        
+
+        if not isTimeBC :
+            return False
+
+        nbSlaves=0
+        nbMasters=0
+        for port_item in ports:
+            ptpRole=port_item["ptpRole"]
+            if ptpRole=="slave" :
+                nbSlaves+=1
+            elif ptpRole=="master" or ptpRole=="none" or ptpRole=="non-wr" :
+                nbMasters+=1
+
+        return (nbSlaves==1) and nbMasters==(self.nbPorts-1)
+
+
+    # Add port configuration for version 5.1.0 to ...
+    def getPortsConfig(self, ports):
+        lines=[]
+        externalPortConfig = self.isExternalPortConfig(ports)
+        PORT_DB_range=list(range(1, self.nbPorts+1)) # 1..18
+
         # Enable external port configuration only for a boundary clock
         lines.append(self.buildEntry(
             self.getItem("CONFIG_PTP_OPT_EXT_PORT_CONFIG_ENABLED",
-                         "y" if isExternalPortConfiguration else "n",item.itemTypeBool)))
+                         "y" if externalPortConfig else "n",item.itemTypeBool)))
         lines.append(self.buildEntry(self.getItem("CONFIG_PTP_SLAVE_ONLY","n")))
         for port_item in ports:
             port_id = int(port_item["portNumber"])
             ptpRole = port_item["ptpRole"]
             # check the range of ports
             if not (1 <= port_id <= 18):
-                print ("Error: Port %s out of range!" % port_item["portNumber"]) 
+                print ("Error: Port %s out of range!" % port_item["portNumber"])
                 continue
-            
+
             # remove current port id from the list
             PORT_DB_range.remove(port_id)
-            
+
             # Configure port
             portCfgName="CONFIG_PORT%02u" % (port_id)
             lines.append(self.buildEntry(
@@ -94,22 +98,22 @@ class Encoder_6_0_0(Encoder_5_0):
                 self.getItem("%s_FIBER" % (portCfgName), port_item["fiber"],item.itemTypeInt)))
             lines.append(self.buildEntry(
                 self.getItem("%s_CONSTANT_ASYMMETRY" % (portCfgName),"0")))
-            
+
             if ptpRole=="none" :
                 lines.append(self.buildEntry(
                     self.getItem("%s_INSTANCE_COUNT_0" % (portCfgName),"y")))
-                continue # Empty port 
+                continue # Empty port
 
             lines.append(self.buildEntry(
                     self.getItem("%s_INSTANCE_COUNT_1" % (portCfgName),"y")))
-            
-                        
+
+
             # Configure port instance (Only one for the moment)
             instCfgName="%s_INST01" % (portCfgName)
             profile= "WR" if ptpRole!="none" else "PTP"
             lines.append(self.buildEntry(
                 self.getItem("%s_PROFILE_%s" % (instCfgName,profile),"y")))
-            if ( isExternalPortConfiguration ) :
+            if externalPortConfig:
                 lines.append(self.buildEntry(
                     self.getItem("%s_DESIRADE_STATE_%s" % (
                         instCfgName,
@@ -144,7 +148,7 @@ class Encoder_6_0_0(Encoder_5_0):
                 self.getItem("%s_SYNC_INTERVAL" % (instCfgName),"0")))
             lines.append(self.buildEntry(
                 self.getItem("%s_MIN_DELAY_REQ_INTERVAL" % (instCfgName),"0")))
-            
+
         # add empty port entries if needed
         for i in PORT_DB_range:
             portCfgName="CONFIG_PORT%02u" % (i)
@@ -157,17 +161,17 @@ class Encoder_6_0_0(Encoder_5_0):
             lines.append(self.buildEntry(
                 self.getItem("%s_INSTANCE_COUNT_0" % (portCfgName),"y",item.itemTypeBool)))
         return lines
-    
+
     def getSfpsConfig(self, sfps):
         lines=super(Encoder_6_0_0,self)._getSfpsConfig(sfps,18,False)
         lines[:0] = [self.buildEntry(
-                self.getItem("CONFIG_N_SFP_ENTRIES",str(len(lines)),item.itemTypeInt))] 
+                self.getItem("CONFIG_N_SFP_ENTRIES",str(len(lines)),item.itemTypeInt))]
         return lines
 
     def getFibersConfig(self, fibers):
         lines=super(Encoder_6_0_0,self)._getFibersConfig(fibers,18,False)
         lines[:0] = [self.buildEntry(
-                self.getItem("CONFIG_N_FIBER_ENTRIES",str(len(lines)),item.itemTypeInt))] 
+                self.getItem("CONFIG_N_FIBER_ENTRIES",str(len(lines)),item.itemTypeInt))]
         return lines
 
     def getVLansConfig(self, vlanPorts, vlans, rvlan):
@@ -219,7 +223,7 @@ class Encoder_6_0_0(Encoder_5_0):
         for vlan_port_data in ports:
             portNumber=int(vlan_port_data["portNumber"])
             vlanPortMode = vlan_port_data["vlanPortMode"]
-            vlanPortVid = vlan_port_data["vlanPortVid"] 
+            vlanPortVid = vlan_port_data["vlanPortVid"]
             vlanPortPrio=vlan_port_data["vlanPortPrio"]
             vlanPortUntagged=vlan_port_data["vlanPortUntag"]
             vlanPortLldpTxVid=vlan_port_data["vlanPortLldpTxVid"]
@@ -233,7 +237,7 @@ class Encoder_6_0_0(Encoder_5_0):
             except :
                 vlanPortPtpVidEnabled=None
             prefix="CONFIG_VLANS_PORT%02u" % (portNumber)
-            
+
             PORT_DB_range.remove(portNumber)
 
             lines.append(self.buildEntry(
@@ -244,17 +248,17 @@ class Encoder_6_0_0(Encoder_5_0):
                     self.getItem(prefix+"_MODE_UNQUALIFIED","y" if vlanPortMode == "unqualified" else "n")))
             lines.append(self.buildEntry(
                 self.getItem(prefix+"_MODE_DISABLED","y" if vlanPortMode == "disabled" else "n")))
-        
+
             if vlanPortUntagged=="true" :
                 lines.append(self.buildEntry(self.getItem(prefix+"_UNTAG_ALL","y")));
                 lines.append(self.buildEntry(self.getItem(prefix+"_UNTAG_NONE","n")));
-            else : 
+            else :
                 lines.append(self.buildEntry(self.getItem(prefix+"_UNTAG_ALL","n")));
                 lines.append(self.buildEntry(self.getItem(prefix+"_UNTAG_NONE","y")));
-            
+
             lines.append(
                     self.buildEntry(self.getItem(prefix+"_PRIO" , vlanPortPrio if vlanPortPrio!=None else "-1" ,item.itemTypeInt)))
-        
+
             # Evaluate PTP VID
             if vlanPortPtpVid==None or vlanPortPtpVidEnabled==None :
                 # Does not exists yet in CCDE
@@ -265,12 +269,12 @@ class Encoder_6_0_0(Encoder_5_0):
                 if vlanPortMode=="trunk" or vlanPortMode=="disabled":
                     vlanPortVid="" # in this case VID is used to set only PTP_VID
             elif vlanPortPtpVidEnabled=="n":
-                #PTP VID exists in CCDE but we use the default behavior 
+                #PTP VID exists in CCDE but we use the default behavior
                  vlanPortPtpVid=vlanPortVid
-                 
+
             lines.append(self.buildEntry(
                     self.getItem(prefix+"_VID", vlanPortVid if vlanPortVid!=None else "",item.itemTypeString)))
-            
+
             lines.append(self.buildEntry(
                     self.getItem(prefix+"_PTP_VID", vlanPortPtpVid if vlanPortPtpVid!=None else "",item.itemTypeString)))
 
